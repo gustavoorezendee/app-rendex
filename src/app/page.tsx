@@ -511,7 +511,7 @@ function RendExAppContent() {
     const profileMap = {
       executor: "Executor Prático",
       social: "Social Comunicador",
-      estrategista: "Estrategista Organizado",
+      estrategista: "Estratégico Analítico",
       digital: "Digital Independente",
     };
 
@@ -897,7 +897,7 @@ function RendExAppContent() {
           </div>
         ) : rendexRecomendadas.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">Nenhuma Rendex encontrada para o seu perfil no momento.</p>
+            <p className="text-gray-600">Ainda não encontramos uma RendEx perfeita para o seu perfil, mas estamos atualizando o catálogo com novas oportunidades. Refaça o teste em alguns dias.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
