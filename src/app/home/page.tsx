@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Heart, Users, Grid3x3, Calculator } from "lucide-react";
+import { RefreshCw, Heart, Users, Grid3x3, Calculator, Crown } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -51,6 +51,13 @@ export default function HomePage() {
       description: "Ver as 3 RendEx mais compatíveis com o seu perfil",
       href: "/minhas-rendex",
       gradient: "from-[#F5C6C6] to-[#E8A5A5]",
+    },
+    {
+      icon: Crown,
+      title: "Meu Plano",
+      description: "Gerencie seu plano e acesse recursos Premium",
+      href: "/plano",
+      gradient: "from-amber-400 to-orange-500",
     },
     {
       icon: Calculator,

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { ChevronRight, ChevronLeft, X, User } from "lucide-react";
+import { ChevronRight, ChevronLeft, X, User, Lock, Crown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { buscarRendexRecomendadas, type RendexCatalogo, type UserProfile as SupabaseUserProfile } from "@/lib/supabase";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { buscarRendexRecomendadas, supabase, type RendexCatalogo, type UserProfile as SupabaseUserProfile } from "@/lib/supabase";
 
 // Tipos
 type Answer = {
@@ -196,13 +197,131 @@ function RendExAppContent() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [selectedIdea, setSelectedIdea] = useState<RendexCatalogo | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [rendexRecomendadas, setRendexRecomendadas] = useState<RendexCatalogo[]>([]);
   const [loadingRendex, setLoadingRendex] = useState(false);
+  const [showResultadoSalvo, setShowResultadoSalvo] = useState(false);
   const { user } = useAuth();
+  const { profile } = useUserProfile();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Carregar último resultado salvo quando usuário está logado
+  useEffect(() => {
+    const carregarResultadoSalvo = async () => {
+      // Só carregar se:
+      // 1. Usuário está logado
+      // 2. Não há resultado atual em memória (rendexRecomendadas vazio)
+      // 3. Está na tela home (não está no meio do quiz)
+      if (!user || rendexRecomendadas.length > 0 || step !== "home") {
+        return;
+      }
+
+      try {
+        // Buscar resultado salvo do usuário
+        const { data: resultadoSalvo, error: errorResultado } = await supabase
+          .from('quiz_resultados')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (errorResultado || !resultadoSalvo) {
+          // Não há resultado salvo, usuário fará o quiz normalmente
+          return;
+        }
+
+        // Buscar as rendex correspondentes aos IDs salvos
+        const { data: rendexData, error: errorRendex } = await supabase
+          .from('rendex_catalogo')
+          .select('*')
+          .in('id', resultadoSalvo.rendex_ids);
+
+        if (errorRendex || !rendexData || rendexData.length === 0) {
+          console.error('Erro ao buscar rendex salvas:', errorRendex);
+          return;
+        }
+
+        // Reconstruir o perfil do usuário baseado no perfil_rendex salvo
+        const profileMap: Record<string, UserProfile> = {
+          "Executor Prático": {
+            type: "executor",
+            title: "Executor Prático",
+            description: "Você é do tipo que gosta de colocar a mão na massa e ver resultado rápido.",
+            strengths: [
+              "Você tem facilidade para executar e finalizar tarefas",
+              "Prefere o que é prático e traz resultados visíveis",
+              "Tem habilidade manual ou criativa que pode ser monetizada",
+            ],
+            mainBlock: "sua maior trava",
+            mainBlockDescription: "Descrição da trava",
+            seeking: "o que você busca",
+            seekingDescription: "Descrição do que busca",
+            finalMessage: "Existem tipos de Rendex que combinam perfeitamente com o seu jeito de trabalhar.",
+          },
+          "Social Comunicador": {
+            type: "social",
+            title: "Social Comunicador",
+            description: "Você se conecta bem com pessoas.",
+            strengths: [
+              "Você tem facilidade natural para se comunicar e criar conexões",
+              "Gosta de trabalhar com pessoas e ajudar os outros",
+              "Tem empatia e sabe ouvir, o que gera confiança",
+            ],
+            mainBlock: "sua maior trava",
+            mainBlockDescription: "Descrição da trava",
+            seeking: "o que você busca",
+            seekingDescription: "Descrição do que busca",
+            finalMessage: "Existem tipos de Rendex que valorizam sua capacidade de se conectar com pessoas.",
+          },
+          "Estratégico Analítico": {
+            type: "estrategista",
+            title: "Estrategista Organizado",
+            description: "Você gosta de planejar, estruturar e ter controle sobre o que está fazendo.",
+            strengths: [
+              "Você tem habilidade para organizar, planejar e estruturar processos",
+              "Presta atenção aos detalhes e evita decisões impulsivas",
+              "Valoriza segurança e previsibilidade, o que reduz riscos",
+            ],
+            mainBlock: "sua maior trava",
+            mainBlockDescription: "Descrição da trava",
+            seeking: "o que você busca",
+            seekingDescription: "Descrição do que busca",
+            finalMessage: "Existem tipos de Rendex que combinam com seu perfil organizado e estratégico.",
+          },
+          "Digital Independente": {
+            type: "digital",
+            title: "Digital Independente",
+            description: "Você se adapta bem à tecnologia e gosta da liberdade que o mundo digital oferece.",
+            strengths: [
+              "Você tem facilidade com tecnologia e ferramentas digitais",
+              "Gosta de trabalhar com autonomia e flexibilidade total",
+              "Se adapta rápido a novos formatos e plataformas",
+            ],
+            mainBlock: "sua maior trava",
+            mainBlockDescription: "Descrição da trava",
+            seeking: "o que você busca",
+            seekingDescription: "Descrição do que busca",
+            finalMessage: "Existem tipos de Rendex que aproveitam sua afinidade com o digital.",
+          },
+        };
+
+        const perfilReconstruido = profileMap[resultadoSalvo.perfil_rendex] || profileMap["Executor Prático"];
+
+        // Preencher os estados
+        setUserProfile(perfilReconstruido);
+        setRendexRecomendadas(rendexData);
+        setShowResultadoSalvo(true);
+        setStep("results");
+
+      } catch (error) {
+        console.error('Erro ao carregar resultado salvo:', error);
+      }
+    };
+
+    carregarResultadoSalvo();
+  }, [user, rendexRecomendadas.length, step]);
 
   // Salvar estado no localStorage antes de redirecionar para login
   const saveStateToLocalStorage = () => {
@@ -533,6 +652,30 @@ function RendExAppContent() {
     };
   };
 
+  // Função para salvar resultado no Supabase
+  const salvarResultadoQuiz = async (perfilRendex: string, rendexIds: string[]) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('quiz_resultados')
+        .upsert({
+          user_id: user.id,
+          perfil_rendex: perfilRendex,
+          rendex_ids: rendexIds,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) {
+        console.error('Erro ao salvar resultado do quiz:', error);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar resultado do quiz:', error);
+    }
+  };
+
   const handleAnswer = (value: string) => {
     const newAnswers = [
       ...answers.filter((a) => a.question !== currentQuestion + 1),
@@ -565,6 +708,12 @@ function RendExAppContent() {
         buscarRendexRecomendadas(supabaseProfile).then((rendex) => {
           setRendexRecomendadas(rendex);
           setLoadingRendex(false);
+
+          // Salvar resultado no banco se usuário estiver logado
+          if (user && rendex.length > 0) {
+            const rendexIds = rendex.map(r => r.id);
+            salvarResultadoQuiz(supabaseProfile.perfil_rendex, rendexIds);
+          }
         });
 
         // Aguardar 2.8 segundos no loading
@@ -578,6 +727,23 @@ function RendExAppContent() {
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const handleRefazerQuiz = () => {
+    setStep("home");
+    setCurrentQuestion(0);
+    setAnswers([]);
+    setUserProfile(null);
+    setRendexRecomendadas([]);
+    setShowResultadoSalvo(false);
+  };
+
+  const handleIrParaInicio = () => {
+    if (user) {
+      router.push("/");
+    } else {
+      router.push("/auth/login?redirect=/");
     }
   };
 
@@ -816,6 +982,17 @@ function RendExAppContent() {
       )}
 
       <div className="max-w-6xl mx-auto">
+        {/* Mensagem de resultado salvo */}
+        {showResultadoSalvo && (
+          <div className="max-w-3xl mx-auto mb-6 mt-8">
+            <div className="bg-gradient-to-r from-[#7A9CC6]/10 to-[#F5C6C6]/10 border border-[#7A9CC6]/30 rounded-2xl p-4 text-center">
+              <p className="text-[#7A9CC6] font-medium">
+                Estamos mostrando o seu último resultado. Você pode refazer o quiz se quiser.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Perfil do usuário */}
         {userProfile && (
           <div className="max-w-3xl mx-auto mb-12 mt-8">
@@ -957,7 +1134,7 @@ function RendExAppContent() {
                       // Se não estiver logado, salvar estado e redirecionar para login
                       if (!user) {
                         saveStateToLocalStorage();
-                        router.push(`/auth/login?redirect=${encodeURIComponent(`/?rendex=${rendex.id}`)}`)
+                        router.push(`/auth/login?redirect=${encodeURIComponent(`/?rendex=${rendex.id}`)}`);
                         return;
                       }
                       // Se estiver logado, mostrar detalhes
@@ -974,19 +1151,19 @@ function RendExAppContent() {
           </div>
         )}
 
-        {/* Botão de refazer */}
-        <div className="text-center">
+        {/* Botões de ação */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
-            onClick={() => {
-              setStep("home");
-              setCurrentQuestion(0);
-              setAnswers([]);
-              setUserProfile(null);
-              setRendexRecomendadas([]);
-            }}
-            className="py-3 px-8 bg-white text-[#7A9CC6] font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+            onClick={handleRefazerQuiz}
+            className="py-3 px-8 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
           >
             Refazer Teste
+          </button>
+          <button
+            onClick={handleIrParaInicio}
+            className="py-3 px-8 bg-white text-[#7A9CC6] font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-[#7A9CC6]"
+          >
+            Ir para o início
           </button>
         </div>
       </div>
@@ -1015,41 +1192,82 @@ function RendExAppContent() {
 
             {/* Conteúdo do modal */}
             <div className="p-8 space-y-6">
-              {/* Primeiro passo (conteúdo gratuito) */}
-              <div>
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
-                  🎯 Primeiro Passo (Gratuito)
+              {/* Seção: Comece por aqui (GRATUITO) */}
+              <div className="bg-white/80 backdrop-blur-sm border-2 border-[#7A9CC6]/30 rounded-2xl p-6 space-y-4">
+                <h3 className="text-2xl font-bold text-[#7A9CC6] mb-4">
+                  🎯 Comece por aqui
                 </h3>
-                <p className="text-gray-700 leading-relaxed bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] p-4 rounded-xl">
-                  {selectedIdea.primeiro_passo}
-                </p>
+
+                {/* Primeiro passo */}
+                <div>
+                  <h4 className="text-lg font-semibold text-[#7A9CC6] mb-2">
+                    Primeiro passo
+                  </h4>
+                  <p className="text-gray-700 leading-relaxed bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] p-4 rounded-xl">
+                    {selectedIdea.primeiro_passo}
+                  </p>
+                </div>
+
+                {/* Teste em 24 horas */}
+                <div>
+                  <h4 className="text-lg font-semibold text-[#7A9CC6] mb-2">
+                    Teste em 24 horas
+                  </h4>
+                  <p className="text-gray-700 leading-relaxed bg-gradient-to-r from-[#FFE8E8] to-[#F5C6C6]/30 p-4 rounded-xl">
+                    {selectedIdea.teste_24h}
+                  </p>
+                </div>
               </div>
 
-              {/* Teste 24h */}
-              <div>
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
-                  ⚡ Teste em 24 horas
-                </h3>
-                <p className="text-gray-700 leading-relaxed bg-gradient-to-r from-[#FFE8E8] to-[#F5C6C6]/30 p-4 rounded-xl">
-                  {selectedIdea.teste_24h}
-                </p>
-              </div>
+              {/* Seção: Kit de Execução Premium */}
+              {profile?.plano === 'premium' ? (
+                <div className="bg-gradient-to-br from-[#8A7CA8]/10 to-[#F5C6C6]/10 border-2 border-[#8A7CA8] rounded-2xl p-6 space-y-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Crown className="w-6 h-6 text-[#8A7CA8]" />
+                    <h3 className="text-2xl font-bold text-[#8A7CA8]">
+                      Kit de Execução Premium
+                    </h3>
+                  </div>
 
-              {/* Passo premium (resumo) */}
-              <div className="bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-[#7A9CC6]/30">
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
-                  🔒 Passo a Passo Completo (Premium)
-                </h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  {selectedIdea.passo_premium_resumo}
-                </p>
-                <button
-                  disabled
-                  className="w-full py-3 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-600 font-bold rounded-xl cursor-not-allowed opacity-60"
-                >
-                  Em breve disponível
-                </button>
-              </div>
+                  {/* Passo premium resumo */}
+                  {selectedIdea.passo_premium_resumo && (
+                    <div>
+                      <p className="text-gray-700 leading-relaxed bg-white/60 p-4 rounded-xl">
+                        {selectedIdea.passo_premium_resumo}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Plano de 7 dias */}
+                  {selectedIdea.premium_conteudo_7dias && (
+                    <div className="mt-4">
+                      <h4 className="text-lg font-semibold text-[#8A7CA8] mb-2">
+                        📅 Plano de 7 dias
+                      </h4>
+                      <p className="text-gray-700 leading-relaxed bg-white/60 p-4 rounded-xl whitespace-pre-line">
+                        {selectedIdea.premium_conteudo_7dias}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center space-y-4">
+                  <div className="flex justify-center">
+                    <div className="bg-gray-200 p-4 rounded-full">
+                      <Lock className="w-8 h-8 text-gray-500" />
+                    </div>
+                  </div>
+                  <p className="text-gray-600 leading-relaxed">
+                    Desbloqueie o Kit de Execução Premium para ter acesso ao plano completo desta RendEx.
+                  </p>
+                  <button
+                    onClick={() => setShowPremiumModal(true)}
+                    className="w-full py-3 bg-gradient-to-r from-[#8A7CA8] to-[#F5C6C6] text-white font-bold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  >
+                    Quero ser Premium
+                  </button>
+                </div>
+              )}
 
               {/* Informações rápidas */}
               <div className="grid grid-cols-2 gap-4 pt-4">
@@ -1078,6 +1296,36 @@ function RendExAppContent() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Premium Info */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="bg-gradient-to-br from-[#8A7CA8] to-[#F5C6C6] p-4 rounded-full">
+                  <Crown className="w-12 h-12 text-white" />
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-[#7A9CC6]">
+                Plano Premium
+              </h3>
+              
+              <p className="text-gray-600 leading-relaxed">
+                O plano Premium está em desenvolvimento e será lançado em breve com conteúdo exclusivo, planos de execução detalhados e suporte personalizado.
+              </p>
+              
+              <button
+                onClick={() => setShowPremiumModal(false)}
+                className="w-full py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+              >
+                Entendi
+              </button>
             </div>
           </div>
         </div>

@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { supabase, type RendexCatalogo } from "@/lib/supabase";
-import { X, ArrowLeft, Search } from "lucide-react";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { X, ArrowLeft, Search, Crown } from "lucide-react";
 import Link from "next/link";
 
 export default function CatalogoPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const { profile, loading: profileLoading } = useUserProfile();
   const [todasRendex, setTodasRendex] = useState<RendexCatalogo[]>([]);
   const [filteredRendex, setFilteredRendex] = useState<RendexCatalogo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +19,8 @@ export default function CatalogoPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("todas");
+
+  const isPremium = profile?.plano === "premium";
 
   useEffect(() => {
     if (!user) {
@@ -73,7 +77,7 @@ export default function CatalogoPage() {
   // Extrair categorias únicas
   const categorias = ["todas", ...Array.from(new Set(todasRendex.map((r) => r.categoria)))];
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex items-center justify-center p-6">
         <div className="text-center">
@@ -97,12 +101,22 @@ export default function CatalogoPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#7A9CC6] mb-3">
-            Catálogo Completo
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-[#7A9CC6]">
+              Catálogo Completo
+            </h1>
+            {isPremium && (
+              <Crown className="w-8 h-8 text-amber-500" />
+            )}
+          </div>
           <p className="text-lg text-gray-700">
             Explore todas as {todasRendex.length} oportunidades disponíveis
           </p>
+          {!isPremium && (
+            <div className="mt-4 inline-block bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-lg text-sm">
+              💡 Com o plano Premium, você desbloqueia os guias completos de todas as RendEx
+            </div>
+          )}
         </div>
 
         {/* Filtros */}
@@ -209,7 +223,7 @@ export default function CatalogoPage() {
         )}
       </div>
 
-      {/* Modal de detalhes (reutilizado do código original) */}
+      {/* Modal de detalhes */}
       {showDetails && selectedIdea && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -253,19 +267,23 @@ export default function CatalogoPage() {
                 </p>
               </div>
 
-              {/* Passo premium */}
-              <div className="bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-[#7A9CC6]/30">
+              {/* Resumo do Plano de Ação */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
                 <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
-                  🔒 Passo a Passo Completo (Premium)
+                  📋 Plano de Ação Premium
                 </h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  {selectedIdea.passo_premium_resumo}
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  {isPremium
+                    ? "Você tem acesso ao plano completo de 7 dias, com passos detalhados, checklists práticos e orientações exclusivas."
+                    : "Desbloqueie o plano de ação completo de 7 dias, com passos detalhados, checklists práticos e orientações exclusivas para executar sua RendEx com sucesso."}
                 </p>
                 <button
-                  disabled
-                  className="w-full py-3 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-600 font-bold rounded-xl cursor-not-allowed opacity-60"
+                  onClick={() => {
+                    router.push(`/plano-acao?id=${selectedIdea.id}&nome=${encodeURIComponent(selectedIdea.nome)}`);
+                  }}
+                  className="w-full py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 >
-                  Em breve disponível
+                  {isPremium ? "Abrir plano de ação completo" : "Ver plano de ação (Premium)"}
                 </button>
               </div>
 
