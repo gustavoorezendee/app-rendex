@@ -59,11 +59,11 @@ function LoginForm() {
         <div className="flex justify-center">
           <Link href="/">
             <Image
-              src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/8d4b8059-8f15-4ced-b8d8-4b58abc5be56.png"
+              src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/011de2a3-0a6d-44e7-8fd4-6d4fc406cc06.png"
               alt="RendEx Logo"
-              width={80}
-              height={80}
-              className="w-20 h-20 object-contain drop-shadow-2xl hover:scale-105 transition-transform cursor-pointer"
+              width={96}
+              height={96}
+              className="w-24 h-24 object-contain drop-shadow-2xl hover:scale-105 transition-transform cursor-pointer"
             />
           </Link>
         </div>

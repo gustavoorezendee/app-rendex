@@ -1,16 +1,41 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Heart, Users, Grid3x3 } from "lucide-react";
+import { RefreshCw, Heart, Users, Grid3x3, Calculator } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
+  // Redirecionar para login se não estiver autenticado
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/auth/login?redirect=/home");
+    }
+  }, [user, loading, router]);
+
+  // Mostrar loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#7A9CC6]"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Não renderizar nada se não estiver autenticado (vai redirecionar)
+  if (!user) {
+    return null;
+  }
+
   // Extrair nome do e-mail (parte antes do @)
-  const userName = user?.email?.split("@")[0] || "Usuário";
+  const userName = user.email?.split("@")[0] || "Usuário";
 
   const cards = [
     {
@@ -26,6 +51,13 @@ export default function HomePage() {
       description: "Ver as 3 RendEx mais compatíveis com o seu perfil",
       href: "/minhas-rendex",
       gradient: "from-[#F5C6C6] to-[#E8A5A5]",
+    },
+    {
+      icon: Calculator,
+      title: "Calculadora de preço",
+      description: "Descubra quanto cobrar pelos seus produtos ou serviços",
+      href: "/calculadora",
+      gradient: "from-[#A8D5BA] to-[#7AC69C]",
     },
     {
       icon: Users,

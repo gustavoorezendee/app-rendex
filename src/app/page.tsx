@@ -619,11 +619,11 @@ function RendExAppContent() {
           <div className="flex justify-center mb-8">
             <div className="relative transform hover:scale-105 transition-transform">
               <Image
-                src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/8d4b8059-8f15-4ced-b8d8-4b58abc5be56.png"
+                src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/011de2a3-0a6d-44e7-8fd4-6d4fc406cc06.png"
                 alt="RendEx Logo"
-                width={120}
-                height={120}
-                className="w-28 h-28 md:w-32 md:h-32 object-contain drop-shadow-2xl"
+                width={140}
+                height={140}
+                className="w-32 h-32 md:w-36 md:h-36 object-contain drop-shadow-2xl"
                 priority
               />
             </div>
@@ -672,7 +672,7 @@ function RendExAppContent() {
     );
   }
 
-  // Tela de Feedback (transição entre perguntas) - SEM LOGO
+  // Tela de Feedback (transição entre perguntas)
   if (step === "feedback") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex flex-col items-center justify-center p-6">
@@ -704,7 +704,7 @@ function RendExAppContent() {
     );
   }
 
-  // Tela de Loading - SEM LOGO
+  // Tela de Loading
   if (step === "loading") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex flex-col items-center justify-center p-6">
@@ -742,7 +742,7 @@ function RendExAppContent() {
     );
   }
 
-  // Quiz - SEM LOGO
+  // Quiz
   if (step === "quiz") {
     const progress = ((currentQuestion + 1) / questions.length) * 100;
     const currentQ = questions[currentQuestion];
@@ -799,7 +799,7 @@ function RendExAppContent() {
     );
   }
 
-  // Resultados - SEM LOGO
+  // Resultados
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] p-6 pb-12">
       {/* Botão de perfil (se logado) */}
@@ -816,7 +816,7 @@ function RendExAppContent() {
       )}
 
       <div className="max-w-6xl mx-auto">
-        {/* Perfil do usuário - RESULTADO PROFUNDO E PERSONALIZADO */}
+        {/* Perfil do usuário */}
         {userProfile && (
           <div className="max-w-3xl mx-auto mb-12 mt-8">
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-10 shadow-xl space-y-8">
@@ -1086,6 +1086,7 @@ function RendExAppContent() {
   );
 }
 
+// Componente wrapper com Suspense
 export default function RendExApp() {
   return (
     <Suspense fallback={
