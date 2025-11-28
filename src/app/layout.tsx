@@ -13,6 +13,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "RendEx - Descubra sua renda extra ideal",
   description: "Teste rápido para descobrir qual renda extra combina com seu perfil",
+  icons: {
+    icon: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/cdd8633e-cc5d-46f0-ab0b-20cdbf312195.png",
+    shortcut: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/cdd8633e-cc5d-46f0-ab0b-20cdbf312195.png",
+    apple: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/cdd8633e-cc5d-46f0-ab0b-20cdbf312195.png"
+  }
 };
 
 export default function RootLayout({

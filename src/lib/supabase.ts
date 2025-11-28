@@ -1,7 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Valores padrão para evitar erros de build quando variáveis não estão configuradas
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+
+// Verificar se as variáveis estão configuradas (apenas em runtime, não durante build)
+const isSupabaseConfigured = typeof window !== 'undefined' 
+  ? !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  : true; // Durante SSR/build, assumir que está configurado
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -110,8 +116,19 @@ export type QuizResultadoSalvo = {
   updatedAt: string;
 };
 
+// Helper para verificar se Supabase está configurado
+function checkSupabaseConfig(): boolean {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase não está configurado. Configure as variáveis de ambiente.');
+    return false;
+  }
+  return true;
+}
+
 // Função para buscar ou criar perfil do usuário
 export async function getOrCreateUserProfile(userId: string): Promise<Profile | null> {
+  if (!checkSupabaseConfig()) return null;
+  
   try {
     // Tentar buscar perfil existente
     const { data: existingProfile, error: fetchError } = await supabase
@@ -158,6 +175,8 @@ export async function updateUserPlano(
   userId: string,
   novoPlano: 'free' | 'premium'
 ): Promise<Profile | null> {
+  if (!checkSupabaseConfig()) return null;
+  
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -185,6 +204,8 @@ export async function updateUserPlano(
 export async function buscarRendexRecomendadas(
   userProfile: UserProfile
 ): Promise<RendexCatalogo[]> {
+  if (!checkSupabaseConfig()) return [];
+  
   try {
     // Mapas de filtros
     const tempoInicioMap: Record<string, string[]> = {
@@ -309,6 +330,8 @@ export async function carregarProgressoRendex(
   userId: string,
   rendexId: string
 ): Promise<UserRendexProgresso[]> {
+  if (!checkSupabaseConfig()) return [];
+  
   try {
     const { data, error } = await supabase
       .from('user_rendex_progresso')
@@ -336,6 +359,8 @@ export async function salvarProgressoRendex(params: {
   dia?: number;
   tarefaTexto?: string;
 }): Promise<boolean> {
+  if (!checkSupabaseConfig()) return false;
+  
   try {
     const { userId, rendexId, tipo, dia, tarefaTexto } = params;
 
@@ -413,6 +438,8 @@ export async function listarProgressoRendex(
   userId: string,
   rendexId: string
 ): Promise<UserRendexChecklistProgress[]> {
+  if (!checkSupabaseConfig()) return [];
+  
   const { data, error } = await supabase
     .from('user_rendex_progresso')
     .select('user_id, rendex_id, checklist_categoria, checklist_item, concluido')
@@ -435,6 +462,8 @@ export async function alternarDiaPlano(
   rendexId: string,
   dia: number
 ): Promise<boolean> {
+  if (!checkSupabaseConfig()) return false;
+  
   try {
     // Primeiro, buscar o registro existente
     const { data: registroExistente, error: fetchError } = await supabase
@@ -492,6 +521,8 @@ export async function alternarChecklistItem(
   categoria: string,
   item: string
 ): Promise<boolean> {
+  if (!checkSupabaseConfig()) return false;
+  
   // Validação de parâmetros obrigatórios
   if (!userId || !rendexId || !categoria || !item) {
     console.warn('alternarChecklistItem: parâmetros obrigatórios faltando', {
@@ -562,6 +593,8 @@ export async function salvarResultadoQuiz(params: {
   perfilIdeal: string;
   rendexIds: string[];
 }): Promise<boolean> {
+  if (!checkSupabaseConfig()) return false;
+  
   const { userId, perfilIdeal, rendexIds } = params;
 
   if (!userId || !perfilIdeal || !rendexIds || rendexIds.length === 0) {
@@ -600,6 +633,8 @@ export async function salvarResultadoQuiz(params: {
  * Busca o resultado do quiz salvo do usuário
  */
 export async function buscarResultadoQuiz(userId: string): Promise<QuizResultadoSalvo | null> {
+  if (!checkSupabaseConfig()) return null;
+  
   if (!userId) {
     console.warn('buscarResultadoQuiz: userId é obrigatório');
     return null;
@@ -642,6 +677,8 @@ export async function buscarResultadoQuiz(userId: string): Promise<QuizResultado
  * Busca as RendEx do resultado do quiz, na ordem salva
  */
 export async function buscarRendexDoResultadoQuiz(userId: string): Promise<RendexCatalogo[] | null> {
+  if (!checkSupabaseConfig()) return null;
+  
   if (!userId) {
     console.warn('buscarRendexDoResultadoQuiz: userId é obrigatório');
     return null;
@@ -686,6 +723,8 @@ export async function buscarRendexDoResultadoQuiz(userId: string): Promise<Rende
  * Limpa o resultado do quiz do usuário
  */
 export async function limparResultadoQuiz(userId: string): Promise<boolean> {
+  if (!checkSupabaseConfig()) return false;
+  
   if (!userId) {
     console.warn('limparResultadoQuiz: userId é obrigatório');
     return false;
