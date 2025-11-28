@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { 
   RendexCatalogo, 
   listarProgressoRendex, 
-  alternarDiaPlano,
   alternarChecklistItem 
 } from "@/lib/supabase";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { Lock, CheckCircle2, Target, ListChecks } from "lucide-react";
+import { Lock, CheckCircle2, Target, ListChecks, Calendar, ArrowLeft, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface PlanoAcaoPremiumProps {
   rendex: RendexCatalogo;
@@ -16,22 +16,39 @@ interface PlanoAcaoPremiumProps {
 }
 
 export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
+  // Padrão de montagem para evitar problemas de hidratação
+  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const { profile } = useUserProfile();
   const planoAcao = rendex.premium_plano_acao;
 
-  // Estados de progresso
-  const [progressoDias, setProgressoDias] = useState<Record<number, boolean>>({});
-  const [progressoChecklist, setProgressoChecklist] = useState<Record<string, boolean>>({});
+  // Estado apenas para o checklist geral
+  const [checklistProgresso, setChecklistProgresso] = useState<Record<string, boolean>>({});
+  const [feedbackSalvo, setFeedbackSalvo] = useState<string | null>(null);
 
-  // Carregar progresso ao montar o componente
+  // Carregar progresso do checklist ao montar o componente
   useEffect(() => {
     async function carregarProgresso() {
       if (!isPremium || !profile || !rendex.id) return;
 
       try {
         const progresso = await listarProgressoRendex(profile.user_id, rendex.id);
-        setProgressoDias(progresso.diasConcluidos);
-        setProgressoChecklist(progresso.checklistConcluido);
+        
+        // Montar objeto de progresso do checklist
+        const checklistMap: Record<string, boolean> = {};
+        progresso.forEach((item) => {
+          if (item.checklist_categoria && item.checklist_item) {
+            const key = `${item.checklist_categoria}::${item.checklist_item}`;
+            checklistMap[key] = item.concluido;
+          }
+        });
+        
+        setChecklistProgresso(checklistMap);
       } catch (error) {
         console.error("Erro ao carregar progresso:", error);
       }
@@ -40,43 +57,63 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
     carregarProgresso();
   }, [isPremium, profile, rendex.id]);
 
-  // Handler para alternar dia como concluído
-  const toggleDia = async (dia: number) => {
-    if (!profile || !isPremium) return;
-
-    try {
-      const novoConcluido = await alternarDiaPlano(profile.user_id, rendex.id, dia);
-      setProgressoDias(prev => ({
-        ...prev,
-        [dia]: novoConcluido
-      }));
-    } catch (error) {
-      console.error("Erro ao alternar dia:", error);
-    }
-  };
-
   // Handler para alternar item do checklist
-  const toggleChecklistItem = async (categoria: string, item: string) => {
-    if (!profile || !isPremium) return;
+  const handleToggleChecklist = async (categoria: string, item: string) => {
+    if (!profile || !isPremium) {
+      console.warn("Usuário não está logado ou não é premium");
+      return;
+    }
 
-    const chave = `${categoria}::${item}`;
+    if (!rendex.id) {
+      console.warn("rendexId não disponível");
+      return;
+    }
 
+    const key = `${categoria}::${item}`;
+    const estadoAnterior = !!checklistProgresso[key];
+    const novoEstado = !estadoAnterior;
+    
+    // Atualização otimista do estado
+    setChecklistProgresso(prev => ({
+      ...prev,
+      [key]: novoEstado
+    }));
+
+    // Salvar no banco em segundo plano
     try {
-      const novoConcluido = await alternarChecklistItem(
+      const sucesso = await alternarChecklistItem(
         profile.user_id, 
         rendex.id, 
         categoria, 
         item
       );
       
-      setProgressoChecklist(prev => ({
-        ...prev,
-        [chave]: novoConcluido
-      }));
+      if (sucesso) {
+        // Feedback visual de sucesso
+        setFeedbackSalvo(categoria);
+        setTimeout(() => setFeedbackSalvo(null), 1500);
+      } else {
+        // Reverter em caso de erro
+        setChecklistProgresso(prev => ({
+          ...prev,
+          [key]: estadoAnterior
+        }));
+        console.error("Falha ao salvar item do checklist");
+      }
     } catch (error) {
-      console.error("Erro ao alternar item do checklist:", error);
+      // Reverter em caso de erro
+      setChecklistProgresso(prev => ({
+        ...prev,
+        [key]: estadoAnterior
+      }));
+      console.error("Falha ao salvar item do checklist", error);
     }
   };
+
+  // Evita problemas de hidratação entre server e client
+  if (!isMounted) {
+    return null;
+  }
 
   // Se não existir plano de ação, não renderiza nada
   if (!planoAcao) {
@@ -111,117 +148,142 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
     );
   }
 
-  // Renderização completa para usuários premium
+  // Renderização completa para usuários premium - PÁGINA DEDICADA
   return (
-    <div className="space-y-8">
-      {/* Cabeçalho */}
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-          Plano de ação da sua RendEx
-        </h2>
-        {planoAcao.descricao_geral && (
-          <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            {planoAcao.descricao_geral}
-          </p>
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] pb-12">
+      {/* Header da página */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              aria-label="Voltar"
+            >
+              <ArrowLeft className="w-6 h-6 text-[#7A9CC6]" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#7A9CC6]">
+                {rendex.nome}
+              </h1>
+              <p className="text-sm text-gray-600">Plano de ação completo</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Bloco: Primeiros Passos */}
-      {planoAcao.primeiros_passos && planoAcao.primeiros_passos.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Primeiros passos para sair do zero
-            </h3>
+      {/* Conteúdo principal */}
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+        {/* Descrição geral */}
+        {planoAcao.descricao_geral && (
+          <div className="text-center max-w-3xl mx-auto">
+            <p className="text-lg text-gray-700 leading-relaxed">
+              {planoAcao.descricao_geral}
+            </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {planoAcao.primeiros_passos.map((passo, index) => (
-              <div
-                key={index}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  {passo.titulo}
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  {passo.descricao}
-                </p>
-                <p className="text-sm italic text-blue-600 dark:text-blue-400 font-medium">
-                  {passo.acao_pratica}
-                </p>
+        )}
+
+        {/* Bloco: Primeiros Passos */}
+        {planoAcao.primeiros_passos && planoAcao.primeiros_passos.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl shadow-sm">
+                <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Bloco: Plano de 7 dias */}
-      {planoAcao.plano_7_dias && planoAcao.plano_7_dias.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Primeiros passos para sair do zero
+              </h2>
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Plano premium de 7 dias
-            </h3>
-          </div>
-          <div className="space-y-4">
-            {planoAcao.plano_7_dias
-              .sort((a, b) => a.dia - b.dia)
-              .map((dia) => {
-                const diaCompleto = progressoDias[dia.dia] === true;
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {planoAcao.primeiros_passos.map((passo, index) => (
+                <div
+                  key={index}
+                  className="group bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-sm">
+                      {index + 1}
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex-1">
+                      {passo.titulo}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                    {passo.descricao}
+                  </p>
+                  <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400 flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span>{passo.acao_pratica}</span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-                return (
+        {/* Bloco: Plano de 7 dias - APENAS INFORMATIVO (SEM CHECKBOXES) */}
+        {planoAcao.plano_7_dias && planoAcao.plano_7_dias.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20 rounded-xl shadow-sm">
+                <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Plano premium de 7 dias
+              </h2>
+            </div>
+            <div className="space-y-5">
+              {planoAcao.plano_7_dias
+                .sort((a, b) => a.dia - b.dia)
+                .map((dia) => (
                   <div
                     key={dia.dia}
-                    className={`bg-white dark:bg-gray-800 rounded-xl p-6 border shadow-sm transition-all ${
-                      diaCompleto
-                        ? "border-green-500 dark:border-green-600 ring-2 ring-green-500/20"
-                        : "border-gray-200 dark:border-gray-700"
-                    }`}
+                    className="group bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-xl transition-all duration-300"
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-4 md:gap-6">
+                      {/* Número do dia destacado */}
                       <div className="flex-shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={diaCompleto}
-                          onChange={() => toggleDia(dia.dia)}
-                          className="w-6 h-6 rounded border-2 border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 cursor-pointer"
-                        />
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                          <div className="text-center">
+                            <div className="text-xs text-white/80 font-medium">DIA</div>
+                            <div className="text-2xl md:text-3xl font-bold text-white">{dia.dia}</div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-1 space-y-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                              Dia {dia.dia}: {dia.titulo}
-                            </h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+
+                      {/* Conteúdo do dia */}
+                      <div className="flex-1 space-y-4">
+                        <div>
+                          <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                            {dia.titulo}
+                          </h3>
+                          <div className="inline-block px-3 py-1 bg-gradient-to-r from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20 rounded-full">
+                            <p className="text-sm font-medium text-green-700 dark:text-green-400">
                               Foco: {dia.foco}
                             </p>
                           </div>
-                          {diaCompleto && (
-                            <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
-                              Concluído
-                            </span>
-                          )}
                         </div>
-                        <p className="text-gray-700 dark:text-gray-300">
-                          <span className="font-medium">Objetivo:</span> {dia.objetivo}
-                        </p>
+                        
+                        <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/30 dark:to-gray-800/30 rounded-xl p-4">
+                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">Objetivo:</span> {dia.objetivo}
+                          </p>
+                        </div>
+
                         {dia.tarefas && dia.tarefas.length > 0 && (
                           <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              Tarefas:
+                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                              Tarefas do dia:
                             </p>
-                            <ul className="space-y-2 ml-4">
+                            <ul className="space-y-2">
                               {dia.tarefas.map((tarefa, idx) => (
-                                <li key={idx} className="flex items-start gap-2">
-                                  <span className="text-green-500 mt-0.5">•</span>
-                                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                                <li key={idx} className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mt-0.5">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  </div>
+                                  <span className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">
                                     {tarefa}
                                   </span>
                                 </li>
@@ -232,72 +294,97 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
                       </div>
                     </div>
                   </div>
+                ))}
+            </div>
+          </section>
+        )}
+
+        {/* Bloco: Checklist Geral - COM CHECKBOXES INTERATIVOS */}
+        {planoAcao.checklist_geral && planoAcao.checklist_geral.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 rounded-xl shadow-sm">
+                <ListChecks className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Checklist geral da execução
+              </h2>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {planoAcao.checklist_geral.map((categoria, index) => {
+                const categoriaConcluida = feedbackSalvo === categoria.categoria;
+                
+                return (
+                  <div
+                    key={index}
+                    className={`relative bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 shadow-md hover:shadow-xl transition-all duration-300 ${
+                      categoriaConcluida 
+                        ? 'border-green-400 dark:border-green-500' 
+                        : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                  >
+                    {/* Feedback visual de salvamento */}
+                    {categoriaConcluida && (
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-2 shadow-lg animate-bounce">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                    )}
+
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                      {categoria.categoria}
+                    </h3>
+                    <ul className="space-y-3">
+                      {categoria.itens.map((item, idx) => {
+                        const key = `${categoria.categoria}::${item}`;
+                        const itemConcluido = !!checklistProgresso[key];
+
+                        return (
+                          <li key={idx} className="flex items-start gap-3 group">
+                            <div className="relative flex-shrink-0 mt-0.5">
+                              <input
+                                type="checkbox"
+                                checked={itemConcluido}
+                                onChange={() => handleToggleChecklist(categoria.categoria, item)}
+                                className="peer w-5 h-5 rounded border-2 border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer transition-all duration-200 hover:scale-110 checked:scale-100 checked:border-purple-500"
+                              />
+                              {/* Animação de check */}
+                              <div className="absolute inset-0 pointer-events-none">
+                                <div className={`w-full h-full rounded transition-all duration-200 ${
+                                  itemConcluido 
+                                    ? 'bg-purple-500/20 scale-150 opacity-0' 
+                                    : 'scale-100 opacity-0'
+                                }`}></div>
+                              </div>
+                            </div>
+                            <span
+                              className={`text-sm flex-1 leading-relaxed transition-all duration-200 ${
+                                itemConcluido
+                                  ? "text-gray-400 dark:text-gray-500 line-through"
+                                  : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100"
+                              }`}
+                            >
+                              {item}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 );
               })}
-          </div>
-        </section>
-      )}
-
-      {/* Bloco: Checklist Geral */}
-      {planoAcao.checklist_geral && planoAcao.checklist_geral.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <ListChecks className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Checklist geral da execução
-            </h3>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {planoAcao.checklist_geral.map((categoria, index) => (
-              <div
-                key={index}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm"
-              >
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                  {categoria.categoria}
-                </h4>
-                <ul className="space-y-2">
-                  {categoria.itens.map((item, idx) => {
-                    const chave = `${categoria.categoria}::${item}`;
-                    const itemConcluido = progressoChecklist[chave] === true;
+          </section>
+        )}
 
-                    return (
-                      <li key={idx} className="flex items-start gap-2">
-                        <input
-                          type="checkbox"
-                          checked={itemConcluido}
-                          onChange={() => toggleChecklistItem(categoria.categoria, item)}
-                          className="w-5 h-5 mt-0.5 rounded border-2 border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer"
-                        />
-                        <span
-                          className={`text-sm flex-1 ${
-                            itemConcluido
-                              ? "text-purple-600 dark:text-purple-400 line-through"
-                              : "text-gray-600 dark:text-gray-400"
-                          }`}
-                        >
-                          {item}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+        {/* Mensagem Final */}
+        {planoAcao.mensagem_final && (
+          <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 shadow-lg">
+            <p className="text-center text-gray-700 dark:text-gray-300 text-lg leading-relaxed italic">
+              {planoAcao.mensagem_final}
+            </p>
           </div>
-        </section>
-      )}
-
-      {/* Mensagem Final */}
-      {planoAcao.mensagem_final && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-          <p className="text-center text-gray-700 dark:text-gray-300 italic">
-            {planoAcao.mensagem_final}
-          </p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

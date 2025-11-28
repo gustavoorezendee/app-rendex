@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { buscarRendexRecomendadas, type RendexCatalogo } from "@/lib/supabase";
+import { buscarRendexDoResultadoQuiz, buscarResultadoQuiz, limparResultadoQuiz, type RendexCatalogo } from "@/lib/supabase";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { X, ArrowLeft, Crown } from "lucide-react";
 import Link from "next/link";
@@ -13,6 +13,7 @@ export default function MinhasRendexPage() {
   const router = useRouter();
   const { profile, loading: profileLoading } = useUserProfile();
   const [rendexRecomendadas, setRendexRecomendadas] = useState<RendexCatalogo[]>([]);
+  const [perfilIdeal, setPerfilIdeal] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [selectedIdea, setSelectedIdea] = useState<RendexCatalogo | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -25,23 +26,52 @@ export default function MinhasRendexPage() {
       return;
     }
 
-    // Tentar recuperar perfil salvo do localStorage
-    const savedState = localStorage.getItem("rendex-quiz-state");
-    if (savedState) {
+    const carregarResultadoSalvo = async () => {
       try {
-        const state = JSON.parse(savedState);
-        if (state.rendexRecomendadas && state.rendexRecomendadas.length > 0) {
-          setRendexRecomendadas(state.rendexRecomendadas);
-          setLoading(false);
-          return;
+        // Buscar resultado do quiz salvo no Supabase
+        const resultado = await buscarResultadoQuiz(user.id);
+        
+        if (resultado) {
+          // Buscar as RendEx correspondentes
+          const rendex = await buscarRendexDoResultadoQuiz(user.id);
+          
+          if (rendex && rendex.length > 0) {
+            setRendexRecomendadas(rendex);
+            setPerfilIdeal(resultado.perfilIdeal);
+          }
         }
       } catch (error) {
-        console.error("Erro ao recuperar estado:", error);
+        console.error("Erro ao carregar resultado salvo:", error);
+      } finally {
+        setLoading(false);
       }
+    };
+
+    carregarResultadoSalvo();
+  }, [user, router]);
+
+  const handleRefazerQuiz = async () => {
+    if (!user) return;
+
+    const confirmar = window.confirm(
+      "Se você refizer o quiz, o resultado atual será apagado e substituído pelo novo. Deseja continuar?"
+    );
+
+    if (!confirmar) {
+      return;
     }
 
-    setLoading(false);
-  }, [user, router]);
+    // Limpar resultado salvo
+    const sucesso = await limparResultadoQuiz(user.id);
+    
+    if (sucesso) {
+      // Redirecionar para o início do quiz
+      router.push("/");
+    } else {
+      console.error("Erro ao limpar resultado do quiz");
+      alert("Ocorreu um erro ao limpar o resultado. Tente novamente.");
+    }
+  };
 
   if (loading || profileLoading) {
     return (
@@ -69,7 +99,7 @@ export default function MinhasRendexPage() {
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 shadow-xl text-center space-y-6">
             <div className="text-6xl mb-4">🎯</div>
             <h2 className="text-3xl font-bold text-[#7A9CC6]">
-              Você ainda não respondeu o quiz
+              Você ainda não concluiu o quiz
             </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
               Para ver suas RendEx personalizadas, você precisa responder o quiz primeiro.
@@ -108,6 +138,17 @@ export default function MinhasRendexPage() {
               <Crown className="w-8 h-8 text-amber-500" />
             )}
           </div>
+          
+          {/* Perfil ideal */}
+          {perfilIdeal && (
+            <div className="mt-4 mb-6">
+              <div className="inline-block bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] px-6 py-3 rounded-2xl">
+                <p className="text-sm text-gray-600 mb-1">Seu perfil atual</p>
+                <p className="text-xl font-bold text-[#7A9CC6]">{perfilIdeal}</p>
+              </div>
+            </div>
+          )}
+          
           <p className="text-lg text-gray-700">
             As 3 oportunidades mais compatíveis com o seu perfil
           </p>
@@ -119,7 +160,7 @@ export default function MinhasRendexPage() {
         </div>
 
         {/* Cards de RendEx */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {rendexRecomendadas.map((rendex, index) => (
             <div
               key={rendex.id}
@@ -183,6 +224,16 @@ export default function MinhasRendexPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Botão Refazer Quiz */}
+        <div className="text-center">
+          <button
+            onClick={handleRefazerQuiz}
+            className="py-3 px-8 bg-white text-[#7A9CC6] font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-[#7A9CC6]"
+          >
+            Refazer Quiz
+          </button>
         </div>
       </div>
 
