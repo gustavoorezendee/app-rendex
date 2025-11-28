@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase, type RendexCatalogo } from "@/lib/supabase";
@@ -8,7 +8,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { PlanoAcaoPremium } from "@/components/PlanoAcaoPremium";
 import { ArrowLeft } from "lucide-react";
 
-export default function PlanoAcaoPage() {
+function PlanoAcaoContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -104,5 +104,22 @@ export default function PlanoAcaoPage() {
         <PlanoAcaoPremium rendex={rendex} isPremium={isPremium} />
       </div>
     </div>
+  );
+}
+
+export default function PlanoAcaoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex items-center justify-center p-6">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#7A9CC6]"></div>
+            <p className="mt-4 text-gray-600">Carregando plano de ação...</p>
+          </div>
+        </div>
+      }
+    >
+      <PlanoAcaoContent />
+    </Suspense>
   );
 }
