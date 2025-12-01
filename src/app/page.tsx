@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { ChevronRight, ChevronLeft, X, User, Lock, Crown } from "lucide-react";
+import { ChevronRight, ChevronLeft, X, User, Lock, Crown, Clock, HelpCircle, Sparkles, Home } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,6 +16,16 @@ import {
   type RendexCatalogo, 
   type UserProfile as SupabaseUserProfile 
 } from "@/lib/supabase";
+
+
+import { 
+  PROFILES_CONFIG, 
+  TRAVAS_CONFIG,
+  getTravaFromAnswer,
+  getMotivacaoFromAnswer,
+  getDefaultTravaMotivacao
+} from "@/lib/quizProfiles";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Tipos
 type Answer = {
@@ -34,6 +44,9 @@ type UserProfile = {
   seekingDescription: string;
   finalMessage: string;
 };
+
+// Chave para localStorage
+const QUIZ_RESULT_STORAGE_KEY = 'rendex-quiz-result-temp';
 
 // Perguntas do quiz com micro-feedbacks únicos por alternativa
 const questions = [
@@ -255,70 +268,23 @@ function RendExAppContent() {
           .filter((r): r is RendexCatalogo => r !== undefined);
 
         // Reconstruir o perfil do usuário baseado no perfil_rendex salvo
-        const profileMap: Record<string, UserProfile> = {
-          "Executor Prático": {
-            type: "executor",
-            title: "Executor Prático",
-            description: "Você é do tipo que gosta de colocar a mão na massa e ver resultado rápido.",
-            strengths: [
-              "Você tem facilidade para executar e finalizar tarefas",
-              "Prefere o que é prático e traz resultados visíveis",
-              "Tem habilidade manual ou criativa que pode ser monetizada",
-            ],
-            mainBlock: "sua maior trava",
-            mainBlockDescription: "Descrição da trava",
-            seeking: "o que você busca",
-            seekingDescription: "Descrição do que busca",
-            finalMessage: "Existem tipos de Rendex que combinam perfeitamente com o seu jeito de trabalhar.",
-          },
-          "Social Comunicador": {
-            type: "social",
-            title: "Social Comunicador",
-            description: "Você se conecta bem com pessoas.",
-            strengths: [
-              "Você tem facilidade natural para se comunicar e criar conexões",
-              "Gosta de trabalhar com pessoas e ajudar os outros",
-              "Tem empatia e sabe ouvir, o que gera confiança",
-            ],
-            mainBlock: "sua maior trava",
-            mainBlockDescription: "Descrição da trava",
-            seeking: "o que você busca",
-            seekingDescription: "Descrição do que busca",
-            finalMessage: "Existem tipos de Rendex que valorizam sua capacidade de se conectar com pessoas.",
-          },
-          "Estratégico Analítico": {
-            type: "estrategista",
-            title: "Estrategista Organizado",
-            description: "Você gosta de planejar, estruturar e ter controle sobre o que está fazendo.",
-            strengths: [
-              "Você tem habilidade para organizar, planejar e estruturar processos",
-              "Presta atenção aos detalhes e evita decisões impulsivas",
-              "Valoriza segurança e previsibilidade, o que reduz riscos",
-            ],
-            mainBlock: "sua maior trava",
-            mainBlockDescription: "Descrição da trava",
-            seeking: "o que você busca",
-            seekingDescription: "Descrição do que busca",
-            finalMessage: "Existem tipos de Rendex que combinam com seu perfil organizado e estratégico.",
-          },
-          "Digital Independente": {
-            type: "digital",
-            title: "Digital Independente",
-            description: "Você se adapta bem à tecnologia e gosta da liberdade que o mundo digital oferece.",
-            strengths: [
-              "Você tem facilidade com tecnologia e ferramentas digitais",
-              "Gosta de trabalhar com autonomia e flexibilidade total",
-              "Se adapta rápido a novos formatos e plataformas",
-            ],
-            mainBlock: "sua maior trava",
-            mainBlockDescription: "Descrição da trava",
-            seeking: "o que você busca",
-            seekingDescription: "Descrição do que busca",
-            finalMessage: "Existem tipos de Rendex que aproveitam sua afinidade com o digital.",
-          },
-        };
+        // Usar configuração centralizada de perfis
+        const perfilConfig = PROFILES_CONFIG[resultadoSalvo.perfilIdeal] || PROFILES_CONFIG["Executor Prático"];
+        
+        // Obter trava e motivação padrão (já que não temos as respostas específicas do quiz salvas)
+        const { trava, motivacao } = getDefaultTravaMotivacao();
 
-        const perfilReconstruido = profileMap[resultadoSalvo.perfilIdeal] || profileMap["Executor Prático"];
+        const perfilReconstruido: UserProfile = {
+          type: perfilConfig.type,
+          title: perfilConfig.title,
+          description: perfilConfig.baseDescription,
+          strengths: perfilConfig.strengths,
+          mainBlock: trava.titulo,
+          mainBlockDescription: trava.descricao,
+          seeking: motivacao.titulo,
+          seekingDescription: motivacao.descricao,
+          finalMessage: perfilConfig.finalMessage,
+        };
 
         // Preencher os estados
         setUserProfile(perfilReconstruido);
@@ -333,6 +299,59 @@ function RendExAppContent() {
 
     carregarResultadoSalvo();
   }, [user, rendexRecomendadas.length, step]);
+
+  // Vincular resultado do localStorage ao usuário após login
+  useEffect(() => {
+    const vincularResultadoAposLogin = async () => {
+      // Só executar se:
+      // 1. Usuário acabou de logar
+      // 2. Existe resultado temporário no localStorage
+      // 3. Ainda não carregou resultado do banco
+      if (!user || rendexRecomendadas.length > 0) {
+        return;
+      }
+
+      try {
+        // Verificar se existe resultado temporário no localStorage
+        const resultadoTemp = localStorage.getItem(QUIZ_RESULT_STORAGE_KEY);
+        
+        if (!resultadoTemp) {
+          return;
+        }
+
+        const { perfilIdeal, rendexIds, timestamp } = JSON.parse(resultadoTemp);
+
+        // Verificar se o resultado não é muito antigo (máximo 24 horas)
+        const horasPassadas = (Date.now() - timestamp) / (1000 * 60 * 60);
+        if (horasPassadas > 24) {
+          // Resultado muito antigo, limpar
+          localStorage.removeItem(QUIZ_RESULT_STORAGE_KEY);
+          return;
+        }
+
+        // Salvar resultado no banco vinculado ao usuário
+        const sucesso = await salvarResultadoQuiz({
+          userId: user.id,
+          perfilIdeal,
+          rendexIds,
+        });
+
+        if (sucesso) {
+          console.log('✅ Resultado do quiz vinculado ao usuário com sucesso!');
+          
+          // Limpar localStorage após vincular
+          localStorage.removeItem(QUIZ_RESULT_STORAGE_KEY);
+          
+          // Recarregar a página para exibir o resultado
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Erro ao vincular resultado após login:', error);
+      }
+    };
+
+    vincularResultadoAposLogin();
+  }, [user, rendexRecomendadas.length]);
 
   // Salvar estado no localStorage antes de redirecionar para login
   const saveStateToLocalStorage = () => {
@@ -472,112 +491,33 @@ function RendExAppContent() {
     };
     const objetivoMensal = objetivoMap[objetivoAnswer?.answer || "ate-500"];
 
-    // Determinar trava principal
-    const travaMap: Record<string, { nome: string; descricao: string }> = {
-      tempo: {
-        nome: "falta de tempo",
-        descricao: "Eu sei que sua rotina é corrida e parece que não sobra espaço para mais nada. Mas isso não significa que você não possa começar. Existem opções de Rendex que se encaixam em pequenos intervalos do seu dia, sem exigir horas seguidas de dedicação. O segredo está em escolher algo que funcione com o tempo que você tem, não contra ele.",
-      },
-      dinheiro: {
-        nome: "investimento inicial limitado",
-        descricao: "Começar sem dinheiro pode parecer impossível, mas não é. Muitas pessoas constroem suas primeiras rendas extras com zero ou quase zero de investimento. O que você precisa é de uma direção clara e de opções que valorizem suas habilidades, não o tamanho da sua conta bancária. E isso existe.",
-      },
-      conhecimento: {
-        nome: "não saber por onde começar",
-        descricao: "A sensação de estar perdido é uma das mais comuns quando pensamos em começar algo novo. Mas isso não é falta de capacidade, é apenas falta de um mapa. Você não precisa saber tudo antes de começar. Precisa apenas de um primeiro passo claro, e é exatamente isso que vamos te dar.",
-      },
-      medo: {
-        nome: "medo de não dar certo",
-        descricao: "O medo de falhar é natural, e mostra que você se importa com o resultado. Mas deixar o medo decidir por você é abrir mão de oportunidades reais. A boa notícia é que existem formas de começar com baixo risco, testando aos poucos, sem colocar tudo em jogo. Você não precisa de coragem cega, precisa de um caminho seguro.",
-      },
-    };
-    const travaData = travaMap[travaAnswer?.answer || "conhecimento"];
+    // Usar configuração centralizada para travas e motivações
+    const travaData = getTravaFromAnswer(travaAnswer?.answer);
+    const motivacaoData = getMotivacaoFromAnswer(motivacaoAnswer?.answer);
 
-    // Determinar motivação
-    const motivacaoMap: Record<string, { nome: string; descricao: string }> = {
-      dinheiro: {
-        nome: "aumentar sua renda mensal",
-        descricao: "Você quer mais dinheiro no final do mês, e isso é completamente legítimo. Não é sobre luxo, é sobre respirar melhor, ter mais margem, conseguir pagar as contas sem aperto. Esse objetivo é claro, direto e alcançável. E quando você encontra a Rendex certa, o dinheiro começa a entrar de forma consistente.",
-      },
-      independencia: {
-        nome: "conquistar independência financeira",
-        descricao: "Você não quer apenas ganhar mais, você quer depender menos. Quer ter a sensação de que está no controle da sua vida financeira, que não precisa pedir permissão ou esperar por ninguém. Essa busca por autonomia é poderosa, e construir uma renda extra é um dos passos mais concretos para chegar lá.",
-      },
-      proposito: {
-        nome: "trabalhar com propósito e significado",
-        descricao: "Para você, não é só sobre o dinheiro. É sobre fazer algo que tenha sentido, que te faça sentir útil, que traga realização. Você quer acordar sabendo que está construindo algo que importa, mesmo que seja pequeno. E quando você encontra uma Rendex alinhada com seus valores, o trabalho deixa de ser peso e vira motivação.",
-      },
-      liberdade: {
-        nome: "ter mais liberdade e flexibilidade",
-        descricao: "Você valoriza a liberdade acima de quase tudo. Quer poder escolher seus horários, trabalhar de onde quiser, não ficar preso a uma rotina rígida. Essa busca por flexibilidade não é preguiça, é uma forma inteligente de viver. E existem tipos de Rendex que te dão exatamente isso: autonomia total sobre o seu tempo.",
-      },
-    };
-    const motivacaoData = motivacaoMap[motivacaoAnswer?.answer || "dinheiro"];
-
-    const profiles = {
-      executor: {
-        type: "executor",
-        title: "Executor Prático",
-        description: "Você é do tipo que gosta de colocar a mão na massa e ver resultado rápido. Não perde tempo com teorias complicadas, prefere o que é direto, funcional e tangível. Quando decide fazer algo, vai até o fim. Você valoriza a simplicidade e tem facilidade para transformar ideias em ação. Pessoas como você constroem coisas reais, com consistência e determinação.",
-        strengths: [
-          "Você tem facilidade para executar e finalizar tarefas",
-          "Prefere o que é prático e traz resultados visíveis",
-          "Tem habilidade manual ou criativa que pode ser monetizada",
-        ],
-        mainBlock: travaData.nome,
-        mainBlockDescription: travaData.descricao,
-        seeking: motivacaoData.nome,
-        seekingDescription: motivacaoData.descricao,
-        finalMessage: "Existem tipos de Rendex (renda extra ou pequeno empreendimento) que combinam perfeitamente com o seu jeito de trabalhar. São opções práticas, diretas e que valorizam sua capacidade de executar. Vamos te mostrar agora quais são as melhores para você começar.",
-      },
-      social: {
-        type: "social",
-        title: "Social Comunicador",
-        description: "Você se conecta bem com pessoas. Tem facilidade para conversar, criar vínculos e fazer os outros se sentirem à vontade. Gosta de ajudar, de estar presente, de fazer diferença na vida de quem está ao seu redor. Você não vê trabalho apenas como tarefa, vê como oportunidade de construir relacionamentos. E isso é um talento raro e valioso.",
-        strengths: [
-          "Você tem facilidade natural para se comunicar e criar conexões",
-          "Gosta de trabalhar com pessoas e ajudar os outros",
-          "Tem empatia e sabe ouvir, o que gera confiança",
-        ],
-        mainBlock: travaData.nome,
-        mainBlockDescription: travaData.descricao,
-        seeking: motivacaoData.nome,
-        seekingDescription: motivacaoData.descricao,
-        finalMessage: "Existem tipos de Rendex (renda extra ou pequeno empreendimento) que valorizam exatamente o que você tem de melhor: sua capacidade de se conectar com pessoas. São opções onde sua comunicação e empatia se transformam em renda. Vamos te mostrar quais são.",
-      },
-      estrategista: {
-        type: "estrategista",
-        title: "Estrategista Organizado",
-        description: "Você gosta de planejar, estruturar e ter controle sobre o que está fazendo. Não age por impulso, prefere entender o cenário antes de tomar decisões. Tem atenção aos detalhes e valoriza a segurança. Pessoas como você constroem bases sólidas, evitam erros desnecessários e sabem que consistência vale mais que velocidade.",
-        strengths: [
-          "Você tem habilidade para organizar, planejar e estruturar processos",
-          "Presta atenção aos detalhes e evita decisões impulsivas",
-          "Valoriza segurança e previsibilidade, o que reduz riscos",
-        ],
-        mainBlock: travaData.nome,
-        mainBlockDescription: travaData.descricao,
-        seeking: motivacaoData.nome,
-        seekingDescription: motivacaoData.descricao,
-        finalMessage: "Existem tipos de Rendex (renda extra ou pequeno empreendimento) que combinam com seu perfil organizado e estratégico. São opções que permitem planejamento, controle e crescimento sustentável. Vamos te mostrar quais são as melhores para você.",
-      },
-      digital: {
-        type: "digital",
-        title: "Digital Independente",
-        description: "Você se adapta bem à tecnologia e gosta da liberdade que o mundo digital oferece. Prefere trabalhar com autonomia, no seu ritmo, sem depender de estruturas físicas ou horários rígidos. Tem facilidade para aprender ferramentas novas e valoriza a flexibilidade acima de tudo. Pessoas como você estão na vanguarda das novas formas de trabalho.",
-        strengths: [
-          "Você tem facilidade com tecnologia e ferramentas digitais",
-          "Gosta de trabalhar com autonomia e flexibilidade total",
-          "Se adapta rápido a novos formatos e plataformas",
-        ],
-        mainBlock: travaData.nome,
-        mainBlockDescription: travaData.descricao,
-        seeking: motivacaoData.nome,
-        seekingDescription: motivacaoData.descricao,
-        finalMessage: "Existem tipos de Rendex (renda extra ou pequeno empreendimento) que aproveitam sua afinidade com o digital e sua busca por liberdade. São opções 100% online, flexíveis e escaláveis. Vamos te mostrar quais são.",
-      },
+    // Mapear tipo de perfil para nome completo
+    const profileNameMap = {
+      executor: "Executor Prático",
+      social: "Social Comunicador",
+      estrategista: "Estratégico Analítico",
+      digital: "Digital Independente",
     };
 
-    const profile = profiles[profileType];
+    const profileName = profileNameMap[profileType];
+    const profileConfig = PROFILES_CONFIG[profileName];
+
+    // Construir perfil completo usando configuração centralizada
+    const profile = {
+      type: profileConfig.type,
+      title: profileConfig.title,
+      description: profileConfig.baseDescription,
+      strengths: profileConfig.strengths,
+      mainBlock: travaData.titulo,
+      mainBlockDescription: travaData.descricao,
+      seeking: motivacaoData.titulo,
+      seekingDescription: motivacaoData.descricao,
+      finalMessage: profileConfig.finalMessage,
+    };
 
     // Adicionar contexto personalizado no início
     const contextoInicial = `Você tem ${tempoDisponivel} disponível, ${investimentoDisponivel}, ${urgenciaRetorno} e busca alcançar ${objetivoMensal} por mês. Eu entendo o seu momento. Você está buscando uma forma real de aumentar sua renda, mas precisa que isso faça sentido com a sua realidade. E é exatamente isso que vamos construir juntos.`;
@@ -663,20 +603,34 @@ function RendExAppContent() {
     };
   };
 
-  // Função para salvar resultado no Supabase (usando a função importada)
+  // Função para salvar resultado no Supabase ou localStorage
   const salvarResultado = async (perfilRendex: string, rendexIds: string[]) => {
-    if (!user) return;
+    if (user) {
+      // Usuário logado: salvar no banco
+      const sucesso = await salvarResultadoQuiz({
+        userId: user.id,
+        perfilIdeal: perfilRendex,
+        rendexIds: rendexIds,
+      });
 
-    const sucesso = await salvarResultadoQuiz({
-      userId: user.id,
-      perfilIdeal: perfilRendex,
-      rendexIds: rendexIds,
-    });
-
-    if (sucesso) {
-      console.log('Resultado do quiz salvo com sucesso!');
+      if (sucesso) {
+        console.log('✅ Resultado do quiz salvo no banco com sucesso!');
+      } else {
+        console.error('❌ Falha ao salvar resultado do quiz no banco');
+      }
     } else {
-      console.error('Falha ao salvar resultado do quiz');
+      // Usuário NÃO logado: salvar no localStorage
+      try {
+        const resultadoTemp = {
+          perfilIdeal: perfilRendex,
+          rendexIds: rendexIds,
+          timestamp: Date.now(),
+        };
+        localStorage.setItem(QUIZ_RESULT_STORAGE_KEY, JSON.stringify(resultadoTemp));
+        console.log('✅ Resultado do quiz salvo no localStorage temporariamente');
+      } catch (error) {
+        console.error('❌ Erro ao salvar resultado no localStorage:', error);
+      }
     }
   };
 
@@ -713,8 +667,8 @@ function RendExAppContent() {
           setRendexRecomendadas(rendex);
           setLoadingRendex(false);
 
-          // Salvar resultado no banco se usuário estiver logado
-          if (user && rendex.length > 0) {
+          // Salvar resultado (no banco se logado, no localStorage se não logado)
+          if (rendex.length > 0) {
             const rendexIds = rendex.map(r => r.id);
             salvarResultado(supabaseProfile.perfil_rendex, rendexIds);
           }
@@ -732,6 +686,12 @@ function RendExAppContent() {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
     }
+  };
+
+  const handleVoltarParaInicio = () => {
+    setStep("home");
+    setCurrentQuestion(0);
+    setAnswers([]);
   };
 
   const handleRefazerQuiz = async () => {
@@ -753,6 +713,11 @@ function RendExAppContent() {
       }
     }
     
+    // Limpar localStorage também (caso exista resultado temporário)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(QUIZ_RESULT_STORAGE_KEY);
+    }
+    
     // Resetar estados e voltar para o início
     setStep("home");
     setCurrentQuestion(0);
@@ -766,12 +731,13 @@ function RendExAppContent() {
     router.push("/home");
   };
 
-  // Tela Inicial
+  // Tela Inicial - VERSÃO MELHORADA
   if (step === "home") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 animate-fadeIn">
+        <ThemeToggle />
         {/* Botão Início no topo esquerdo */}
-        <div className="absolute top-6 left-6">
+        <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-10">
           <button
             onClick={() => {
               if (user) {
@@ -780,79 +746,145 @@ function RendExAppContent() {
                 router.push("/auth/login?redirect=/home");
               }
             }}
-            className="text-[#7A9CC6] hover:text-[#8A7CA8] font-medium transition-colors"
+            className="text-[#7A9CC6] dark:text-blue-400 hover:text-[#8A7CA8] dark:hover:text-blue-300 font-medium transition-all duration-300 hover:scale-105 flex items-center gap-1 group"
           >
-            Início →
+            <span>Início</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 
         {/* Botão de perfil (se logado) */}
         {user && (
-          <div className="absolute top-6 right-6">
+          <div className="absolute top-4 sm:top-6 right-16 sm:right-20 z-10">
             <Link
               href="/profile"
-              className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
-              <User className="w-5 h-5 text-[#7A9CC6]" />
-              <span className="text-sm font-medium text-[#7A9CC6]">Perfil</span>
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-[#7A9CC6] dark:text-blue-400" />
+              <span className="text-xs sm:text-sm font-medium text-[#7A9CC6] dark:text-blue-400">Perfil</span>
             </Link>
           </div>
         )}
 
-        <div className="max-w-md w-full text-center space-y-8">
-          {/* Logo Real */}
-          <div className="flex justify-center mb-8">
-            <div className="relative transform hover:scale-105 transition-transform">
+        <div className="max-w-lg w-full text-center space-y-6 sm:space-y-8">
+          {/* Logo Real com animação de pulse suave */}
+          <div className="flex justify-center mb-6 sm:mb-8">
+            <div className="relative transform hover:scale-105 transition-transform duration-500 animate-pulse-slow">
               <Image
                 src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/011de2a3-0a6d-44e7-8fd4-6d4fc406cc06.png"
                 alt="RendEx Logo"
-                width={140}
-                height={140}
-                className="w-32 h-32 md:w-36 md:h-36 object-contain drop-shadow-2xl"
+                width={160}
+                height={160}
+                className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl"
                 priority
               />
             </div>
           </div>
 
-          {/* Título */}
-          <div className="space-y-3">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] bg-clip-text text-transparent">
+          {/* Título com hierarquia visual melhorada */}
+          <div className="space-y-3 sm:space-y-4">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-[#7A9CC6] via-[#8A7CA8] to-[#F5C6C6] dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent leading-tight animate-gradient">
               RendEx
             </h1>
-            <p className="text-2xl md:text-3xl font-semibold text-[#7A9CC6]">
+            <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-[#7A9CC6] dark:text-blue-400 leading-snug">
               Descubra sua renda extra ideal
             </p>
           </div>
 
-          {/* Descrição */}
-          <p className="text-lg text-gray-700 leading-relaxed px-4">
+          {/* Descrição com melhor legibilidade */}
+          <p className="text-base sm:text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-relaxed px-2 sm:px-4 max-w-md mx-auto">
             Faça um teste rápido e descubra qual renda extra combina perfeitamente
             com seu perfil, tempo disponível e objetivos.
           </p>
 
-          {/* Botão */}
+          {/* Card informativo com glassmorphism */}
+          <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg border border-white/40 dark:border-gray-700/40 max-w-sm mx-auto">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
+              <div className="flex flex-col items-center gap-2 sm:gap-3">
+                <div className="bg-gradient-to-br from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-500 dark:to-purple-500 p-2.5 sm:p-3 rounded-xl shadow-md">
+                  <HelpCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-[#7A9CC6] dark:text-blue-400">10</p>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">perguntas</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2 sm:gap-3">
+                <div className="bg-gradient-to-br from-[#F5C6C6] to-[#8A7CA8] dark:from-pink-500 dark:to-purple-500 p-2.5 sm:p-3 rounded-xl shadow-md">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-[#F5C6C6] dark:text-pink-400">3</p>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">minutos</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Frase motivacional */}
+          <div className="flex items-center justify-center gap-2 text-sm sm:text-base text-[#8A7CA8] dark:text-purple-400 font-medium">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>100% gratuito e personalizado</span>
+          </div>
+
+          {/* Botão melhorado com animações */}
           <button
             onClick={() => setStep("quiz")}
-            className="group relative w-full max-w-xs mx-auto py-4 px-8 bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] text-white text-lg font-semibold rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+            className="group relative w-full max-w-xs mx-auto py-3.5 sm:py-4 px-6 sm:px-8 bg-gradient-to-r from-[#7A9CC6] via-[#8A7CA8] to-[#F5C6C6] dark:from-blue-500 dark:via-purple-500 dark:to-pink-500 text-white text-base sm:text-lg font-semibold rounded-2xl sm:rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
           >
-            <span className="flex items-center justify-center gap-2">
-              Começar
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            {/* Efeito de brilho animado */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+            
+            <span className="relative flex items-center justify-center gap-2">
+              Começar agora
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-2 transition-transform duration-300" />
             </span>
           </button>
 
-          {/* Indicadores */}
-          <div className="flex justify-center gap-6 pt-8 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#7A9CC6]"></div>
-              <span>10 perguntas</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#F5C6C6]"></div>
-              <span>3 minutos</span>
-            </div>
-          </div>
+          {/* Texto de confiança */}
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">
+            Mais de 1.000 pessoas já descobriram sua RendEx ideal
+          </p>
         </div>
+
+        <style jsx>{`
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          @keyframes gradient {
+            0%, 100% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+          }
+          @keyframes pulse-slow {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.85;
+            }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out;
+          }
+          .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+          }
+          .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+          }
+        `}</style>
       </div>
     );
   }
@@ -860,11 +892,12 @@ function RendExAppContent() {
   // Tela de Feedback (transição entre perguntas)
   if (step === "feedback") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col items-center justify-center p-6">
+        <ThemeToggle />
         <div className="max-w-md w-full text-center space-y-6 animate-fadeIn">
           {/* Feedback emocional */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl">
-            <p className="text-xl md:text-2xl font-medium text-[#7A9CC6] leading-relaxed">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/40 dark:border-gray-700/40">
+            <p className="text-xl md:text-2xl font-medium text-[#7A9CC6] dark:text-blue-400 leading-relaxed">
               {currentFeedback}
             </p>
           </div>
@@ -892,19 +925,20 @@ function RendExAppContent() {
   // Tela de Loading
   if (step === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col items-center justify-center p-6">
+        <ThemeToggle />
         <div className="max-w-md w-full text-center space-y-8">
           {/* Mensagens de loading */}
           <div className="space-y-4">
-            <div className="h-2 bg-white/50 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] animate-loading"></div>
+            <div className="h-2 bg-white/50 dark:bg-gray-700/50 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] dark:from-blue-500 dark:to-pink-500 animate-loading"></div>
             </div>
             
-            <h2 className="text-2xl font-bold text-[#7A9CC6]">
+            <h2 className="text-2xl font-bold text-[#7A9CC6] dark:text-blue-400">
               Analisando suas respostas
             </h2>
             
-            <p className="text-lg text-gray-700">
+            <p className="text-lg text-gray-700 dark:text-gray-300">
               Estou preparando o melhor caminho de Rendex para você.
             </p>
           </div>
@@ -933,27 +967,42 @@ function RendExAppContent() {
     const currentQ = questions[currentQuestion];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex flex-col p-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col p-4 sm:p-6">
+        <ThemeToggle />
         {/* Header com progresso */}
-        <div className="max-w-2xl w-full mx-auto mb-8 mt-6">
+        <div className="max-w-2xl w-full mx-auto mb-6 sm:mb-8 mt-4 sm:mt-6">
           <div className="flex items-center justify-between mb-4">
+            {/* Botão de voltar para tela inicial */}
+            <button
+              onClick={handleVoltarParaInicio}
+              className="group flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 hover:bg-white/90 dark:hover:bg-gray-800/90"
+              title="Voltar para o início"
+            >
+              <Home className="w-4 h-4 sm:w-5 sm:h-5 text-[#7A9CC6] dark:text-blue-400 group-hover:text-[#8A7CA8] dark:group-hover:text-blue-300 transition-colors" />
+              <span className="text-xs sm:text-sm font-medium text-[#7A9CC6] dark:text-blue-400 group-hover:text-[#8A7CA8] dark:group-hover:text-blue-300 transition-colors hidden sm:inline">
+                Início
+              </span>
+            </button>
+
+            <span className="text-xs sm:text-sm font-medium text-[#7A9CC6] dark:text-blue-400">
+              Pergunta {currentQuestion + 1} de {questions.length}
+            </span>
+
+            {/* Botão de voltar para pergunta anterior */}
             <button
               onClick={handlePrevious}
               disabled={currentQuestion === 0}
-              className="p-2 rounded-xl hover:bg-white/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-2 rounded-xl hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Pergunta anterior"
             >
-              <ChevronLeft className="w-6 h-6 text-[#7A9CC6]" />
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-[#7A9CC6] dark:text-blue-400" />
             </button>
-            <span className="text-sm font-medium text-[#7A9CC6]">
-              Pergunta {currentQuestion + 1} de {questions.length}
-            </span>
-            <div className="w-10"></div>
           </div>
 
           {/* Barra de progresso */}
-          <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+          <div className="h-2 bg-white/50 dark:bg-gray-700/50 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] dark:from-blue-500 dark:to-pink-500 transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -961,20 +1010,20 @@ function RendExAppContent() {
 
         {/* Pergunta */}
         <div className="max-w-2xl w-full mx-auto flex-1 flex flex-col">
-          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-xl">
-            <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-8">
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 shadow-xl border border-white/40 dark:border-gray-700/40">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-6 sm:mb-8">
               {currentQ.question}
             </h2>
 
             {/* Opções */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {currentQ.options.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => handleAnswer(option.value)}
-                  className="w-full p-5 rounded-2xl text-left transition-all duration-300 transform hover:scale-102 bg-white hover:bg-gradient-to-r hover:from-[#D6EAF8] hover:to-[#FFE8E8] text-gray-700 shadow-md hover:shadow-lg"
+                  className="w-full p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left transition-all duration-300 transform hover:scale-102 bg-white dark:bg-gray-800 hover:bg-gradient-to-r hover:from-[#D6EAF8] hover:to-[#FFE8E8] dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 text-gray-700 dark:text-gray-200 shadow-md hover:shadow-lg border border-transparent dark:border-gray-700"
                 >
-                  <span className="font-medium text-lg">{option.label}</span>
+                  <span className="font-medium text-base sm:text-lg">{option.label}</span>
                 </button>
               ))}
             </div>
@@ -986,16 +1035,17 @@ function RendExAppContent() {
 
   // Resultados
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] p-6 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 pb-12">
+      <ThemeToggle />
       {/* Botão de perfil (se logado) */}
       {user && (
-        <div className="absolute top-6 right-6">
+        <div className="absolute top-6 right-20">
           <Link
             href="/profile"
-            className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
           >
-            <User className="w-5 h-5 text-[#7A9CC6]" />
-            <span className="text-sm font-medium text-[#7A9CC6]">Perfil</span>
+            <User className="w-5 h-5 text-[#7A9CC6] dark:text-blue-400" />
+            <span className="text-sm font-medium text-[#7A9CC6] dark:text-blue-400">Perfil</span>
           </Link>
         </div>
       )}
@@ -1004,8 +1054,8 @@ function RendExAppContent() {
         {/* Mensagem de resultado salvo */}
         {showResultadoSalvo && (
           <div className="max-w-3xl mx-auto mb-6 mt-8">
-            <div className="bg-gradient-to-r from-[#7A9CC6]/10 to-[#F5C6C6]/10 border border-[#7A9CC6]/30 rounded-2xl p-4 text-center">
-              <p className="text-[#7A9CC6] font-medium">
+            <div className="bg-gradient-to-r from-[#7A9CC6]/10 to-[#F5C6C6]/10 dark:from-blue-500/10 dark:to-pink-500/10 border border-[#7A9CC6]/30 dark:border-blue-500/30 rounded-2xl p-4 text-center">
+              <p className="text-[#7A9CC6] dark:text-blue-400 font-medium">
                 Estamos mostrando o seu último resultado. Você pode refazer o quiz se quiser.
               </p>
             </div>
@@ -1015,30 +1065,30 @@ function RendExAppContent() {
         {/* Perfil do usuário */}
         {userProfile && (
           <div className="max-w-3xl mx-auto mb-12 mt-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-10 shadow-xl space-y-8">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 md:p-10 shadow-xl space-y-8 border border-white/40 dark:border-gray-700/40">
               {/* 1. Validação da situação atual */}
               <div className="space-y-4">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                   {userProfile.description}
                 </p>
               </div>
 
               {/* 2. Perfil identificado */}
-              <div className="bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] p-6 rounded-2xl">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-3 text-center">
+              <div className="bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] dark:from-blue-900/30 dark:to-purple-900/30 p-6 rounded-2xl">
+                <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3 text-center">
                   Seu Perfil: {userProfile.title}
                 </h2>
               </div>
 
               {/* 3. Pontos fortes */}
               <div>
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-4">
+                <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-4">
                   Seus pontos fortes:
                 </h3>
                 <ul className="space-y-3">
                   {userProfile.strengths.map((strength, index) => (
-                    <li key={index} className="flex items-start gap-3 text-gray-700">
-                      <span className="text-[#F5C6C6] text-xl mt-0.5">✓</span>
+                    <li key={index} className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
+                      <span className="text-[#F5C6C6] dark:text-pink-400 text-xl mt-0.5">✓</span>
                       <span className="leading-relaxed">{strength}</span>
                     </li>
                   ))}
@@ -1046,28 +1096,28 @@ function RendExAppContent() {
               </div>
 
               {/* 4. Trava principal */}
-              <div className="bg-gradient-to-r from-[#FFE8E8] to-[#F5C6C6]/30 p-6 rounded-2xl">
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
+              <div className="bg-gradient-to-r from-[#FFE8E8] to-[#F5C6C6]/30 dark:from-pink-900/20 dark:to-purple-900/20 p-6 rounded-2xl">
+                <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
                   Sua maior trava: {userProfile.mainBlock}
                 </h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                   {userProfile.mainBlockDescription}
                 </p>
               </div>
 
               {/* 5. Motivação principal */}
               <div>
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
+                <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
                   O que você realmente busca: {userProfile.seeking}
                 </h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                   {userProfile.seekingDescription}
                 </p>
               </div>
 
               {/* 6. Mensagem final */}
-              <div className="pt-6 border-t border-[#7A9CC6]/20">
-                <p className="text-center text-gray-700 leading-relaxed font-medium">
+              <div className="pt-6 border-t border-[#7A9CC6]/20 dark:border-blue-500/20">
+                <p className="text-center text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
                   {userProfile.finalMessage}
                 </p>
               </div>
@@ -1077,10 +1127,10 @@ function RendExAppContent() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#7A9CC6] mb-3">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
             Suas Rendas Extras Ideais
           </h1>
-          <p className="text-lg text-gray-700">
+          <p className="text-lg text-gray-700 dark:text-gray-300">
             Estas são as opções que mais combinam com você
           </p>
         </div>
@@ -1088,26 +1138,26 @@ function RendExAppContent() {
         {/* Loading ou Cards de resultados */}
         {loadingRendex ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#7A9CC6]"></div>
-            <p className="mt-4 text-gray-600">Carregando suas Rendex personalizadas...</p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#7A9CC6] dark:border-blue-400"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Carregando suas Rendex personalizadas...</p>
           </div>
         ) : rendexRecomendadas.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">Ainda não encontramos uma RendEx perfeita para o seu perfil, mas estamos atualizando o catálogo com novas oportunidades. Refaça o teste em alguns dias.</p>
+            <p className="text-gray-600 dark:text-gray-400">Ainda não encontramos uma RendEx perfeita para o seu perfil, mas estamos atualizando o catálogo com novas oportunidades. Refaça o teste em alguns dias.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {rendexRecomendadas.map((rendex, index) => (
               <div
                 key={rendex.id}
-                className={`relative bg-white rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-all duration-300 ${
-                  index === 0 ? "ring-4 ring-[#F5C6C6]" : ""
+                className={`relative bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-all duration-300 border border-white/40 dark:border-gray-700/40 ${
+                  index === 0 ? "ring-4 ring-[#F5C6C6] dark:ring-pink-500" : ""
                 }`}
               >
                 {/* Badge de recomendação */}
                 {index === 0 && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-gradient-to-r from-[#F5C6C6] to-[#8A7CA8] text-white text-sm font-bold py-2 px-6 rounded-full shadow-lg">
+                    <div className="bg-gradient-to-r from-[#F5C6C6] to-[#8A7CA8] dark:from-pink-500 dark:to-purple-500 text-white text-sm font-bold py-2 px-6 rounded-full shadow-lg">
                       ⭐ Mais recomendada
                     </div>
                   </div>
@@ -1115,33 +1165,33 @@ function RendExAppContent() {
 
                 <div className="space-y-4 mt-2">
                   {/* Nome */}
-                  <h3 className="text-2xl font-bold text-[#7A9CC6]">{rendex.nome}</h3>
+                  <h3 className="text-2xl font-bold text-[#7A9CC6] dark:text-blue-400">{rendex.nome}</h3>
 
                   {/* Descrição */}
-                  <p className="text-gray-600 leading-relaxed">{rendex.descricao_curta}</p>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{rendex.descricao_curta}</p>
 
                   {/* Categoria */}
-                  <div className="inline-block bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] px-3 py-1 rounded-full text-sm font-medium text-[#7A9CC6]">
+                  <div className="inline-block bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] dark:from-blue-900/30 dark:to-purple-900/30 px-3 py-1 rounded-full text-sm font-medium text-[#7A9CC6] dark:text-blue-400">
                     {rendex.categoria}
                   </div>
 
                   {/* Informações */}
                   <div className="space-y-2 pt-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">Investimento:</span>
-                      <span className="font-semibold text-[#7A9CC6]">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Investimento:</span>
+                      <span className="font-semibold text-[#7A9CC6] dark:text-blue-400">
                         R$ {rendex.investimento_inicial}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">Tempo de início:</span>
-                      <span className="font-semibold text-[#7A9CC6]">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Tempo de início:</span>
+                      <span className="font-semibold text-[#7A9CC6] dark:text-blue-400">
                         {rendex.tempo_inicio.replace('_', ' ')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">Ganho inicial:</span>
-                      <span className="font-semibold text-[#7A9CC6]">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Ganho inicial:</span>
+                      <span className="font-semibold text-[#7A9CC6] dark:text-blue-400">
                         {rendex.ganho_inicial_estimado}
                       </span>
                     </div>
@@ -1160,7 +1210,7 @@ function RendExAppContent() {
                       setSelectedIdea(rendex);
                       setShowDetails(true);
                     }}
-                    className="w-full mt-4 py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                    className="w-full mt-4 py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-500 dark:to-purple-500 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                   >
                     Ver Passo a Passo
                   </button>
@@ -1174,13 +1224,13 @@ function RendExAppContent() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={handleRefazerQuiz}
-            className="py-3 px-8 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+            className="py-3 px-8 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-500 dark:to-purple-500 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
           >
             Refazer Teste
           </button>
           <button
             onClick={handleIrParaInicio}
-            className="py-3 px-8 bg-white text-[#7A9CC6] font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-[#7A9CC6]"
+            className="py-3 px-8 bg-white dark:bg-gray-800 text-[#7A9CC6] dark:text-blue-400 font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-[#7A9CC6] dark:border-blue-500"
           >
             Ir para o início
           </button>
@@ -1190,9 +1240,9 @@ function RendExAppContent() {
       {/* Modal de detalhes - USANDO O MESMO PADRÃO DO CATÁLOGO/MINHAS RENDEX */}
       {showDetails && selectedIdea && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/40 dark:border-gray-700/40">
             {/* Header do modal */}
-            <div className="sticky top-0 bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] p-6 rounded-t-3xl">
+            <div className="sticky top-0 bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] dark:from-blue-600 dark:to-purple-600 p-6 rounded-t-3xl">
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-3xl font-bold text-white mb-2">
@@ -1213,27 +1263,27 @@ function RendExAppContent() {
             <div className="p-8 space-y-6">
               {/* Primeiro passo */}
               <div>
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
+                <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
                   🎯 Primeiro Passo (Gratuito)
                 </h3>
-                <p className="text-gray-700 leading-relaxed bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] p-4 rounded-xl">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-xl">
                   {selectedIdea.primeiro_passo}
                 </p>
               </div>
 
               {/* Teste 24h */}
               <div>
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
+                <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
                   ⚡ Teste em 24 horas
                 </h3>
-                <p className="text-gray-700 leading-relaxed bg-gradient-to-r from-[#FFE8E8] to-[#F5C6C6]/30 p-4 rounded-xl">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed bg-gradient-to-r from-[#FFE8E8] to-[#F5C6C6]/30 dark:from-pink-900/20 dark:to-purple-900/20 p-4 rounded-xl">
                   {selectedIdea.teste_24h}
                 </p>
               </div>
 
               {/* Resumo do Plano de Ação */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
-                <h3 className="text-xl font-bold text-[#7A9CC6] mb-3">
+                <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
                   📋 Plano de Ação Premium
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -1245,7 +1295,7 @@ function RendExAppContent() {
                   onClick={() => {
                     router.push(`/plano-acao?id=${selectedIdea.id}&nome=${encodeURIComponent(selectedIdea.nome)}`);
                   }}
-                  className="w-full py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  className="w-full py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-500 dark:to-purple-500 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 >
                   {isPremium ? "Abrir plano de ação completo" : "Ver plano de ação (Premium)"}
                 </button>
@@ -1253,27 +1303,27 @@ function RendExAppContent() {
 
               {/* Informações rápidas */}
               <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <div className="text-sm text-gray-500 mb-1">Investimento</div>
-                  <div className="font-bold text-[#7A9CC6]">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Investimento</div>
+                  <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
                     R$ {selectedIdea.investimento_inicial}
                   </div>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <div className="text-sm text-gray-500 mb-1">Complexidade</div>
-                  <div className="font-bold text-[#7A9CC6]">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Complexidade</div>
+                  <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
                     {selectedIdea.complexidade}/5
                   </div>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <div className="text-sm text-gray-500 mb-1">Ganho inicial</div>
-                  <div className="font-bold text-[#7A9CC6]">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Ganho inicial</div>
+                  <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
                     {selectedIdea.ganho_inicial_estimado}
                   </div>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <div className="text-sm text-gray-500 mb-1">Em 3 meses</div>
-                  <div className="font-bold text-[#7A9CC6]">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Em 3 meses</div>
+                  <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
                     {selectedIdea.ganho_3meses_estimado}
                   </div>
                 </div>
@@ -1286,25 +1336,25 @@ function RendExAppContent() {
       {/* Modal Premium Info */}
       {showPremiumModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full p-8 shadow-2xl border border-white/40 dark:border-gray-700/40">
             <div className="text-center space-y-6">
               <div className="flex justify-center">
-                <div className="bg-gradient-to-br from-[#8A7CA8] to-[#F5C6C6] p-4 rounded-full">
+                <div className="bg-gradient-to-br from-[#8A7CA8] to-[#F5C6C6] dark:from-purple-500 dark:to-pink-500 p-4 rounded-full">
                   <Crown className="w-12 h-12 text-white" />
                 </div>
               </div>
               
-              <h3 className="text-2xl font-bold text-[#7A9CC6]">
+              <h3 className="text-2xl font-bold text-[#7A9CC6] dark:text-blue-400">
                 Plano Premium
               </h3>
               
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 O plano Premium está em desenvolvimento e será lançado em breve com conteúdo exclusivo, planos de execução detalhados e suporte personalizado.
               </p>
               
               <button
                 onClick={() => setShowPremiumModal(false)}
-                className="w-full py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                className="w-full py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-500 dark:to-purple-500 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
               >
                 Entendi
               </button>
@@ -1320,8 +1370,8 @@ function RendExAppContent() {
 export default function RendExApp() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7A9CC6]"></div>
+      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7A9CC6] dark:border-blue-400"></div>
       </div>
     }>
       <RendExAppContent />

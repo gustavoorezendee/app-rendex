@@ -747,3 +747,8 @@ export async function limparResultadoQuiz(userId: string): Promise<boolean> {
     return false;
   }
 }
+
+// ============================================
+// FUNÇÕES PARA SUPORTE E FEEDBACK
+// ============================================
+// MOVIDAS PARA src/server/supportActions.ts (server-side only)

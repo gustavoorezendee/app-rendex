@@ -358,17 +358,17 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Custos por unidade
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Informe os custos para produzir cada unidade
               </p>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Custo de matéria-prima (R$)
                 </label>
                 <input
@@ -382,16 +382,16 @@ export default function CalculadoraPage() {
                       materiaPrimaUnit: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Ex: 5.50"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Ex: farinha, açúcar, tecido, componentes
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Custo de embalagem (R$)
                 </label>
                 <input
@@ -405,16 +405,16 @@ export default function CalculadoraPage() {
                       embalagemUnit: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Ex: 2.00"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Ex: caixas, sacolas, etiquetas
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Outros custos (R$) - opcional
                 </label>
                 <input
@@ -428,10 +428,10 @@ export default function CalculadoraPage() {
                       outrosVariaveisUnit: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Ex: 1.50"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Ex: entrega, comissão, taxa de plataforma
                 </p>
               </div>
@@ -443,13 +443,13 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Custos fixos mensais
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Adicione custos fixos relacionados a essa renda
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Ex: aluguel, apps, energia, marketing
               </p>
             </div>
@@ -464,7 +464,7 @@ export default function CalculadoraPage() {
                       onChange={(e) =>
                         atualizarCustoFixoProduto(custo.id, "descricao", e.target.value)
                       }
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="Descrição do custo"
                     />
                     <input
@@ -475,13 +475,13 @@ export default function CalculadoraPage() {
                       onChange={(e) =>
                         atualizarCustoFixoProduto(custo.id, "valor", parseFloat(e.target.value) || 0)
                       }
-                      className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="Valor mensal (R$)"
                     />
                   </div>
                   <button
                     onClick={() => removerCustoFixoProduto(custo.id)}
-                    className="mt-1 p-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                    className="mt-1 p-3 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
                     aria-label="Remover custo"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -491,17 +491,17 @@ export default function CalculadoraPage() {
 
               <button
                 onClick={adicionarCustoFixoProduto}
-                className="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl border-2 border-dashed border-[#7A9CC6] text-[#7A9CC6] hover:bg-[#7A9CC6] hover:text-white transition-all duration-300 font-semibold"
+                className="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl border-2 border-dashed border-[#7A9CC6] dark:border-blue-500 text-[#7A9CC6] dark:text-blue-400 hover:bg-[#7A9CC6] dark:hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold"
               >
                 <Plus className="w-5 h-5" />
                 Adicionar custo fixo
               </button>
 
               {produtoData.custosFixos.length > 0 && (
-                <div className="bg-blue-50 rounded-xl p-4 mt-4">
-                  <p className="text-sm font-semibold text-gray-700">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 mt-4">
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Total de custos fixos:{" "}
-                    <span className="text-[#7A9CC6] text-lg">
+                    <span className="text-[#7A9CC6] dark:text-blue-400 text-lg">
                       {formatarMoeda(
                         produtoData.custosFixos.reduce((acc, c) => acc + (c.valor || 0), 0)
                       )}
@@ -517,10 +517,10 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Quantidade ou horas
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Ajude-nos a calcular o custo fixo por unidade
               </p>
             </div>
@@ -528,7 +528,7 @@ export default function CalculadoraPage() {
             {!produtoData.usarHoras ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Quantas unidades por mês você pode produzir/vender?
                   </label>
                   <input
@@ -542,12 +542,12 @@ export default function CalculadoraPage() {
                       })
                     }
                     className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
-                      errors.quantidade ? "border-red-300" : "border-gray-200"
-                    } focus:border-[#7A9CC6] focus:outline-none transition-colors`}
+                      errors.quantidade ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                     placeholder="Ex: 50"
                   />
                   {errors.quantidade && (
-                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
                       {errors.quantidade}
                     </p>
@@ -558,7 +558,7 @@ export default function CalculadoraPage() {
                   onClick={() =>
                     setProdutoData({ ...produtoData, usarHoras: true, quantidadeMensalEstimativa: 0 })
                   }
-                  className="w-full py-3 px-4 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium"
+                  className="w-full py-3 px-4 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
                 >
                   Não sei estimar isso
                 </button>
@@ -566,7 +566,7 @@ export default function CalculadoraPage() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Horas por semana dedicadas
                   </label>
                   <input
@@ -580,12 +580,12 @@ export default function CalculadoraPage() {
                       })
                     }
                     className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
-                      errors.horasSemana ? "border-red-300" : "border-gray-200"
-                    } focus:border-[#7A9CC6] focus:outline-none transition-colors`}
+                      errors.horasSemana ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                     placeholder="Ex: 10"
                   />
                   {errors.horasSemana && (
-                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
                       {errors.horasSemana}
                     </p>
@@ -593,7 +593,7 @@ export default function CalculadoraPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Horas para produzir 1 unidade
                   </label>
                   <input
@@ -608,12 +608,12 @@ export default function CalculadoraPage() {
                       })
                     }
                     className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
-                      errors.horasPorUnidade ? "border-red-300" : "border-gray-200"
-                    } focus:border-[#7A9CC6] focus:outline-none transition-colors`}
+                      errors.horasPorUnidade ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                     placeholder="Ex: 2.5"
                   />
                   {errors.horasPorUnidade && (
-                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
                       {errors.horasPorUnidade}
                     </p>
@@ -624,7 +624,7 @@ export default function CalculadoraPage() {
                   onClick={() =>
                     setProdutoData({ ...produtoData, usarHoras: false, horasSemana: 0, horasPorUnidade: 0 })
                   }
-                  className="w-full py-3 px-4 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium"
+                  className="w-full py-3 px-4 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
                 >
                   Voltar para estimativa de quantidade
                 </button>
@@ -637,17 +637,17 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Taxas e margem
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Informe as taxas e a margem de lucro desejada
               </p>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Taxas sobre o preço (%)
                 </label>
                 <input
@@ -662,16 +662,16 @@ export default function CalculadoraPage() {
                       taxaSobrePrecoPercent: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Ex: 5.5"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Ex: maquininha (3%), marketplace (10%)
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Margem de lucro desejada (%)
                 </label>
                 <input
@@ -686,24 +686,24 @@ export default function CalculadoraPage() {
                       margemPercentual: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Ex: 30"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Sugestão: 30% é uma margem comum
                 </p>
               </div>
 
               {errors.taxaMargem && (
-                <div className="bg-red-50 rounded-xl p-4 flex gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-800">{errors.taxaMargem}</p>
+                <div className="bg-red-50 dark:bg-red-900/30 rounded-xl p-4 flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-800 dark:text-red-300">{errors.taxaMargem}</p>
                 </div>
               )}
 
-              <div className="bg-amber-50 rounded-xl p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-800">
+              <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-800 dark:text-amber-300">
                   A soma de taxa e margem deve ser menor que 100%
                 </p>
               </div>
@@ -716,60 +716,60 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6" id="result-section">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Resultado da Calculadora
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Valores calculados para o seu produto
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xs font-semibold text-amber-800 mb-2 uppercase tracking-wide">
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-2 uppercase tracking-wide">
                   Preço mínimo
                 </h3>
-                <p className="text-4xl font-bold text-amber-900 mb-1">
+                <p className="text-4xl font-bold text-amber-900 dark:text-amber-300 mb-1">
                   {formatarMoeda(resultado.precoMinimo)}
                 </p>
-                <p className="text-xs text-amber-700">
+                <p className="text-xs text-amber-700 dark:text-amber-400">
                   Para não ter prejuízo
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xs font-semibold text-green-800 mb-2 uppercase tracking-wide">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-green-800 dark:text-green-400 mb-2 uppercase tracking-wide">
                   Preço ideal
                 </h3>
-                <p className="text-4xl font-bold text-green-900 mb-1">
+                <p className="text-4xl font-bold text-green-900 dark:text-green-300 mb-1">
                   {formatarMoeda(resultado.precoIdeal)}
                 </p>
-                <p className="text-xs text-green-700">
+                <p className="text-xs text-green-700 dark:text-green-400">
                   Com margem de lucro
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xs font-semibold text-blue-800 mb-2 uppercase tracking-wide">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-blue-800 dark:text-blue-400 mb-2 uppercase tracking-wide">
                   Lucro por unidade
                 </h3>
-                <p className="text-4xl font-bold text-blue-900 mb-1">
+                <p className="text-4xl font-bold text-blue-900 dark:text-blue-300 mb-1">
                   {formatarMoeda(resultado.lucroUnitario)}
                 </p>
-                <p className="text-xs text-blue-700">
+                <p className="text-xs text-blue-700 dark:text-blue-400">
                   Em cada venda
                 </p>
               </div>
 
               {resultado.lucroMensalEstimado !== null && (
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                  <h3 className="text-xs font-semibold text-purple-800 mb-2 uppercase tracking-wide">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                  <h3 className="text-xs font-semibold text-purple-800 dark:text-purple-400 mb-2 uppercase tracking-wide">
                     Lucro mensal estimado
                   </h3>
-                  <p className="text-4xl font-bold text-purple-900 mb-1">
+                  <p className="text-4xl font-bold text-purple-900 dark:text-purple-300 mb-1">
                     {formatarMoeda(resultado.lucroMensalEstimado)}
                   </p>
-                  <p className="text-xs text-purple-700">
+                  <p className="text-xs text-purple-700 dark:text-purple-400">
                     Com {resultado.quantidadeUsada} unidades/mês
                   </p>
                 </div>
@@ -777,14 +777,14 @@ export default function CalculadoraPage() {
             </div>
 
             {/* Simulação de lucro mensal */}
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border-2 border-indigo-200">
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-2xl p-6 border-2 border-indigo-200 dark:border-indigo-700">
               <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wide">
+                <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wide">
                   Simule seu lucro mensal
                 </h3>
               </div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 E se você vender quantas unidades por mês?
               </label>
               <input
@@ -797,21 +797,21 @@ export default function CalculadoraPage() {
                     quantidadeSimulacao: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-3 text-lg rounded-xl border-2 border-indigo-200 focus:border-indigo-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 text-lg rounded-xl border-2 border-indigo-200 dark:border-indigo-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-400 dark:focus:border-indigo-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 placeholder="Ex: 100"
               />
               {resultado.lucroSimulacao !== null && (
-                <div className="mt-4 p-4 bg-white/50 rounded-xl">
-                  <p className="text-sm text-gray-700 mb-1">Seu lucro mensal seria:</p>
-                  <p className="text-3xl font-bold text-indigo-900">
+                <div className="mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-1">Seu lucro mensal seria:</p>
+                  <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-300">
                     {formatarMoeda(resultado.lucroSimulacao)}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
-              <p className="text-gray-700 leading-relaxed text-sm">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 rounded-2xl p-6">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
                 💡 <strong>Entenda os números:</strong> Com esse preço ideal, você cobre custos, 
                 paga taxas e mantém sua margem de lucro. Se um concorrente cobra muito abaixo, 
                 provavelmente está ganhando menos ou tendo prejuízo.
@@ -835,7 +835,7 @@ export default function CalculadoraPage() {
                   quantidadeSimulacao: 0,
                 });
               }}
-              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white font-semibold hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
             >
               Fazer novo cálculo
             </button>
@@ -854,17 +854,17 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Tempo e valor da hora
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Garanta que seu preço seja digno do seu trabalho
               </p>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Horas por atendimento
                 </label>
                 <input
@@ -879,23 +879,23 @@ export default function CalculadoraPage() {
                     })
                   }
                   className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
-                    errors.horasAtendimento ? "border-red-300" : "border-gray-200"
-                  } focus:border-[#7A9CC6] focus:outline-none transition-colors`}
+                    errors.horasAtendimento ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                   placeholder="Ex: 2.5"
                 />
                 {errors.horasAtendimento && (
-                  <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
                     {errors.horasAtendimento}
                   </p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Tempo total: preparação + execução + finalização
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Valor desejado por hora (R$)
                 </label>
                 <input
@@ -910,24 +910,24 @@ export default function CalculadoraPage() {
                     })
                   }
                   className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
-                    errors.valorHora ? "border-red-300" : "border-gray-200"
-                  } focus:border-[#7A9CC6] focus:outline-none transition-colors`}
+                    errors.valorHora ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                   placeholder="Ex: 50"
                 />
                 {errors.valorHora && (
-                  <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
                     {errors.valorHora}
                   </p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Valor que faça valer seu tempo e esforço
                 </p>
               </div>
 
-              <div className="bg-blue-50 rounded-xl p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-800">
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-800 dark:text-blue-300">
                   Definir um valor justo por hora garante que você seja bem remunerado
                 </p>
               </div>
@@ -939,17 +939,17 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Custos por atendimento
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Custos diretos que você tem a cada cliente
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Custos diretos (R$)
                 </label>
                 <input
@@ -963,16 +963,16 @@ export default function CalculadoraPage() {
                       custoDiretoAtendimento: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Ex: 15.00"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Ex: materiais, deslocamento, estacionamento
                 </p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-sm text-gray-600">
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   💡 Sem custos diretos? Deixe em zero
                 </p>
               </div>
@@ -984,13 +984,13 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Custos fixos mensais
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Custos fixos relacionados a essa atividade
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Ex: aluguel, apps, energia, marketing
               </p>
             </div>
@@ -1005,7 +1005,7 @@ export default function CalculadoraPage() {
                       onChange={(e) =>
                         atualizarCustoFixoServico(custo.id, "descricao", e.target.value)
                       }
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="Descrição do custo"
                     />
                     <input
@@ -1016,13 +1016,13 @@ export default function CalculadoraPage() {
                       onChange={(e) =>
                         atualizarCustoFixoServico(custo.id, "valor", parseFloat(e.target.value) || 0)
                       }
-                      className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="Valor mensal (R$)"
                     />
                   </div>
                   <button
                     onClick={() => removerCustoFixoServico(custo.id)}
-                    className="mt-1 p-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                    className="mt-1 p-3 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
                     aria-label="Remover custo"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -1032,17 +1032,17 @@ export default function CalculadoraPage() {
 
               <button
                 onClick={adicionarCustoFixoServico}
-                className="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl border-2 border-dashed border-[#7A9CC6] text-[#7A9CC6] hover:bg-[#7A9CC6] hover:text-white transition-all duration-300 font-semibold"
+                className="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl border-2 border-dashed border-[#7A9CC6] dark:border-blue-500 text-[#7A9CC6] dark:text-blue-400 hover:bg-[#7A9CC6] dark:hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold"
               >
                 <Plus className="w-5 h-5" />
                 Adicionar custo fixo
               </button>
 
               {servicoData.custosFixos.length > 0 && (
-                <div className="bg-blue-50 rounded-xl p-4 mt-4">
-                  <p className="text-sm font-semibold text-gray-700">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 mt-4">
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Total de custos fixos:{" "}
-                    <span className="text-[#7A9CC6] text-lg">
+                    <span className="text-[#7A9CC6] dark:text-blue-400 text-lg">
                       {formatarMoeda(
                         servicoData.custosFixos.reduce((acc, c) => acc + (c.valor || 0), 0)
                       )}
@@ -1052,7 +1052,7 @@ export default function CalculadoraPage() {
               )}
 
               <div className="mt-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Horas mensais dedicadas
                 </label>
                 <input
@@ -1066,17 +1066,17 @@ export default function CalculadoraPage() {
                     })
                   }
                   className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
-                    errors.horasMes ? "border-red-300" : "border-gray-200"
-                  } focus:border-[#7A9CC6] focus:outline-none transition-colors`}
+                    errors.horasMes ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                   placeholder="Ex: 40"
                 />
                 {errors.horasMes && (
-                  <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
                     {errors.horasMes}
                   </p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Para calcular custo fixo por atendimento
                 </p>
               </div>
@@ -1088,17 +1088,17 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Taxas
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Taxas que incidem sobre o preço do serviço
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Taxas sobre o preço (%)
                 </label>
                 <input
@@ -1113,16 +1113,16 @@ export default function CalculadoraPage() {
                       taxaSobrePrecoPercent: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#7A9CC6] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Ex: 3.5"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Ex: maquininha, plataforma, imposto. Deixe 0 se não tiver
                 </p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-sm text-gray-600">
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   💡 Sem taxas? Deixe em zero
                 </p>
               </div>
@@ -1135,73 +1135,73 @@ export default function CalculadoraPage() {
         return (
           <div className="space-y-6" id="result-section">
             <div className="text-center mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
                 Resultado da Calculadora
               </h2>
-              <p className="text-gray-600 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                 Valores calculados para o seu serviço
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xs font-semibold text-green-800 mb-2 uppercase tracking-wide">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-green-800 dark:text-green-400 mb-2 uppercase tracking-wide">
                   Preço recomendado
                 </h3>
-                <p className="text-4xl font-bold text-green-900 mb-1">
+                <p className="text-4xl font-bold text-green-900 dark:text-green-300 mb-1">
                   {formatarMoeda(resultado.precoIdeal)}
                 </p>
-                <p className="text-xs text-green-700">
+                <p className="text-xs text-green-700 dark:text-green-400">
                   Por atendimento
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xs font-semibold text-blue-800 mb-2 uppercase tracking-wide">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-blue-800 dark:text-blue-400 mb-2 uppercase tracking-wide">
                   Seu ganho por hora
                 </h3>
-                <p className="text-4xl font-bold text-blue-900 mb-1">
+                <p className="text-4xl font-bold text-blue-900 dark:text-blue-300 mb-1">
                   {formatarMoeda(resultado.valorTempo)}
                 </p>
-                <p className="text-xs text-blue-700">
+                <p className="text-xs text-blue-700 dark:text-blue-400">
                   Valor do seu tempo
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xs font-semibold text-amber-800 mb-2 uppercase tracking-wide">
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-2 uppercase tracking-wide">
                   Custos por atendimento
                 </h3>
-                <p className="text-4xl font-bold text-amber-900 mb-1">
+                <p className="text-4xl font-bold text-amber-900 dark:text-amber-300 mb-1">
                   {formatarMoeda(resultado.custoTotalAtendimento)}
                 </p>
-                <p className="text-xs text-amber-700">
+                <p className="text-xs text-amber-700 dark:text-amber-400">
                   Materiais + fixos
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xs font-semibold text-purple-800 mb-2 uppercase tracking-wide">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-purple-800 dark:text-purple-400 mb-2 uppercase tracking-wide">
                   Lucro por atendimento
                 </h3>
-                <p className="text-4xl font-bold text-purple-900 mb-1">
+                <p className="text-4xl font-bold text-purple-900 dark:text-purple-300 mb-1">
                   {formatarMoeda(resultado.lucroAtendimento)}
                 </p>
-                <p className="text-xs text-purple-700">
+                <p className="text-xs text-purple-700 dark:text-purple-400">
                   Depois de pagar tudo
                 </p>
               </div>
             </div>
 
             {/* Campo para estimar lucro mensal */}
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border-2 border-indigo-200">
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-2xl p-6 border-2 border-indigo-200 dark:border-indigo-700">
               <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wide">
+                <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wide">
                   Simule seu lucro mensal
                 </h3>
               </div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Quantos atendimentos por mês você pretende fazer?
               </label>
               <input
@@ -1214,21 +1214,21 @@ export default function CalculadoraPage() {
                     atendimentosSimulacao: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-3 text-lg rounded-xl border-2 border-indigo-200 focus:border-indigo-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 text-lg rounded-xl border-2 border-indigo-200 dark:border-indigo-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-400 dark:focus:border-indigo-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 placeholder="Ex: 10"
               />
               {resultado.lucroSimulacao !== null && (
-                <div className="mt-4 p-4 bg-white/50 rounded-xl">
-                  <p className="text-sm text-gray-700 mb-1">Seu lucro mensal seria:</p>
-                  <p className="text-3xl font-bold text-indigo-900">
+                <div className="mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-1">Seu lucro mensal seria:</p>
+                  <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-300">
                     {formatarMoeda(resultado.lucroSimulacao)}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
-              <p className="text-gray-700 leading-relaxed text-sm">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 rounded-2xl p-6">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
                 💡 <strong>Entenda os números:</strong> Com esse preço, você cobre custos, 
                 paga taxas e recebe aproximadamente {formatarMoeda(servicoData.valorHoraDesejado)} por hora. 
                 Ajuste o valor da sua hora se quiser aumentar ou diminuir o preço final.
@@ -1249,7 +1249,7 @@ export default function CalculadoraPage() {
                   atendimentosSimulacao: 0,
                 });
               }}
-              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white font-semibold hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white font-semibold hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
             >
               Fazer novo cálculo
             </button>
@@ -1262,13 +1262,13 @@ export default function CalculadoraPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 md:p-8 transition-colors duration-300">
       <div className="max-w-4xl mx-auto">
         {/* Header com botão voltar */}
         <div className="mb-6">
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-[#7A9CC6] transition-colors font-medium"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#7A9CC6] dark:hover:text-blue-400 transition-colors font-medium"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar
@@ -1276,25 +1276,25 @@ export default function CalculadoraPage() {
         </div>
 
         {/* Card principal */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-10">
+        <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-10 transition-colors duration-300">
           {/* Título e descrição */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#7A9CC6] mb-3">
+            <h1 className="text-3xl md:text-4xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
               Calculadora de preço RendEx
             </h1>
-            <p className="text-gray-600 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+            <p className="text-gray-600 dark:text-gray-400 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
               Calcule um preço justo para seus produtos ou serviços, levando em conta custos, tempo e taxas. Responda etapa por etapa.
             </p>
           </div>
 
           {/* Seletor de tipo (Produto/Serviço) - sempre visível */}
-          <div className="flex gap-3 mb-8 flex-col sm:flex-row sticky top-4 z-10 bg-white/95 backdrop-blur-sm p-4 -mx-4 md:-mx-6 rounded-2xl shadow-sm">
+          <div className="flex gap-3 mb-8 flex-col sm:flex-row sticky top-4 z-10 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-4 -mx-4 md:-mx-6 rounded-2xl shadow-sm">
             <button
               onClick={() => handleTypeChange("produto")}
               className={`flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-base transition-all duration-300 ${
                 type === "produto"
-                  ? "bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white shadow-lg scale-[1.02]"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white shadow-lg scale-[1.02]"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
               <Package className="w-6 h-6" />
@@ -1304,8 +1304,8 @@ export default function CalculadoraPage() {
               onClick={() => handleTypeChange("servico")}
               className={`flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-base transition-all duration-300 ${
                 type === "servico"
-                  ? "bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white shadow-lg scale-[1.02]"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white shadow-lg scale-[1.02]"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
               <Briefcase className="w-6 h-6" />
@@ -1316,16 +1316,16 @@ export default function CalculadoraPage() {
           {/* Indicador de progresso visual */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Passo {currentStep} de {totalSteps}
               </span>
-              <span className="text-sm font-bold text-[#7A9CC6]">
+              <span className="text-sm font-bold text-[#7A9CC6] dark:text-blue-400">
                 {Math.round((currentStep / totalSteps) * 100)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden shadow-inner">
               <div
-                className="bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] h-full rounded-full transition-all duration-500 ease-out shadow-sm"
+                className="bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 h-full rounded-full transition-all duration-500 ease-out shadow-sm"
                 style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               />
             </div>
@@ -1346,21 +1346,21 @@ export default function CalculadoraPage() {
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center font-bold mb-2 transition-all duration-300 ${
                       step.number === currentStep
-                        ? "bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white shadow-lg ring-4 ring-[#7A9CC6]/20"
+                        ? "bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white shadow-lg ring-4 ring-[#7A9CC6]/20 dark:ring-blue-500/20"
                         : step.number < currentStep
-                        ? "bg-[#7A9CC6] text-white"
-                        : "bg-gray-200 text-gray-500"
+                        ? "bg-[#7A9CC6] dark:bg-blue-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     {step.number}
                   </div>
                   <span className={`text-xs text-center max-w-[90px] font-medium ${
-                    step.number === currentStep ? "text-[#7A9CC6]" : "text-gray-600"
+                    step.number === currentStep ? "text-[#7A9CC6] dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
                   }`}>
                     {step.title}
                   </span>
                   {index < steps.length - 1 && (
-                    <div className="absolute top-6 left-1/2 w-full h-0.5 bg-gray-200 -z-10" />
+                    <div className="absolute top-6 left-1/2 w-full h-0.5 bg-gray-200 dark:bg-gray-700 -z-10" />
                   )}
                 </div>
               ))}
@@ -1368,7 +1368,7 @@ export default function CalculadoraPage() {
           </div>
 
           {/* Conteúdo do passo atual */}
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 md:p-8 min-h-[450px] shadow-inner">
+          <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-700/50 rounded-2xl p-6 md:p-8 min-h-[450px] shadow-inner transition-colors duration-300">
             {type === "produto" ? renderProdutoStep() : renderServicoStep()}
           </div>
 
@@ -1379,8 +1379,8 @@ export default function CalculadoraPage() {
               disabled={currentStep === 1}
               className={`flex-1 flex items-center justify-center gap-2 py-5 px-6 rounded-2xl font-bold text-lg transition-all duration-300 ${
                 currentStep === 1
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md active:scale-95"
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md active:scale-95"
               }`}
             >
               <ArrowLeft className="w-6 h-6" />
@@ -1389,7 +1389,7 @@ export default function CalculadoraPage() {
 
             <button
               onClick={handleNext}
-              className="flex-1 flex items-center justify-center gap-2 py-5 px-6 rounded-2xl font-bold text-lg bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] text-white hover:shadow-xl transform hover:scale-[1.02] active:scale-95 transition-all duration-300"
+              className="flex-1 flex items-center justify-center gap-2 py-5 px-6 rounded-2xl font-bold text-lg bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white hover:shadow-xl transform hover:scale-[1.02] active:scale-95 transition-all duration-300"
             >
               {currentStep < totalSteps ? "Próximo" : "Ver resultado"}
               <ArrowRight className="w-6 h-6" />
@@ -1398,7 +1398,7 @@ export default function CalculadoraPage() {
         </div>
 
         {/* Informação adicional */}
-        <div className="text-center mt-6 text-gray-600 text-sm">
+        <div className="text-center mt-6 text-gray-600 dark:text-gray-400 text-sm">
           <p>
             💡 Preencha todos os campos com atenção para um cálculo preciso
           </p>

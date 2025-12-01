@@ -123,7 +123,7 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
   // Se não for premium, mostra teaser
   if (!isPremium) {
     return (
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-2xl p-8 border border-amber-200 dark:border-amber-800">
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-2xl p-8 border border-amber-200 dark:border-amber-800 transition-colors duration-300">
         <div className="flex items-start gap-4">
           <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
             <Lock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -150,23 +150,23 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
 
   // Renderização completa para usuários premium - PÁGINA DEDICADA
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 pb-12 transition-colors duration-300">
       {/* Header da página */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 shadow-sm transition-colors duration-300">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
               aria-label="Voltar"
             >
-              <ArrowLeft className="w-6 h-6 text-[#7A9CC6]" />
+              <ArrowLeft className="w-6 h-6 text-[#7A9CC6] dark:text-blue-400" />
             </button>
             <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#7A9CC6]">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400">
                 {rendex.nome}
               </h1>
-              <p className="text-sm text-gray-600">Plano de ação completo</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Plano de ação completo</p>
             </div>
           </div>
         </div>
@@ -176,8 +176,8 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
         {/* Descrição geral */}
         {planoAcao.descricao_geral && (
-          <div className="text-center max-w-3xl mx-auto">
-            <p className="text-lg text-gray-700 leading-relaxed">
+          <div className="text-center max-w-3xl mx-auto bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 transition-colors duration-300">
+            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
               {planoAcao.descricao_geral}
             </p>
           </div>
@@ -345,7 +345,7 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
                                 type="checkbox"
                                 checked={itemConcluido}
                                 onChange={() => handleToggleChecklist(categoria.categoria, item)}
-                                className="peer w-5 h-5 rounded border-2 border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer transition-all duration-200 hover:scale-110 checked:scale-100 checked:border-purple-500"
+                                className="peer w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 text-purple-600 dark:text-purple-500 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 cursor-pointer transition-all duration-200 hover:scale-110 checked:scale-100 checked:border-purple-500 dark:checked:border-purple-400 bg-white dark:bg-gray-700"
                               />
                               {/* Animação de check */}
                               <div className="absolute inset-0 pointer-events-none">
@@ -378,7 +378,7 @@ export function PlanoAcaoPremium({ rendex, isPremium }: PlanoAcaoPremiumProps) {
 
         {/* Mensagem Final */}
         {planoAcao.mensagem_final && (
-          <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 shadow-lg">
+          <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 shadow-lg transition-colors duration-300">
             <p className="text-center text-gray-700 dark:text-gray-300 text-lg leading-relaxed italic">
               {planoAcao.mensagem_final}
             </p>

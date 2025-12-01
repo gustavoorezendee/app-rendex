@@ -1,45 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Heart, Users, Grid3x3, Calculator, Crown, Headphones } from "lucide-react";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { supabase } from "@/lib/supabase";
+import { MessageSquare, AlertCircle, Mail, ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 
-export default function HomePage() {
+export default function SuportePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [userName, setUserName] = useState<string>("");
 
   // Redirecionar para login se não estiver autenticado
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/auth/login?redirect=/home");
+      router.push("/auth/login?redirect=/suporte");
     }
   }, [user, loading, router]);
-
-  // Buscar username do Supabase
-  useEffect(() => {
-    const loadUsername = async () => {
-      if (user) {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("username")
-          .eq("user_id", user.id)
-          .single();
-
-        if (data && data.username) {
-          setUserName(data.username);
-        } else {
-          // Fallback: usar parte do e-mail se não houver username
-          setUserName(user.email?.split("@")[0] || "Usuário");
-        }
-      }
-    };
-    loadUsername();
-  }, [user]);
 
   // Mostrar loading enquanto verifica autenticação
   if (loading) {
@@ -60,74 +36,54 @@ export default function HomePage() {
 
   const cards = [
     {
-      icon: RefreshCw,
-      title: "Refazer quiz",
-      description: "Responder tudo de novo para atualizar suas recomendações",
-      href: "/",
+      icon: MessageSquare,
+      title: "Enviar feedback",
+      description: "Compartilhe suas sugestões e ideias para melhorar a RendEx",
+      href: "/suporte/feedback",
       gradient: "from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600",
     },
     {
-      icon: Heart,
-      title: "Minhas RendEx",
-      description: "Ver as 3 RendEx mais compatíveis com o seu perfil",
-      href: "/minhas-rendex",
+      icon: AlertCircle,
+      title: "Reportar problema",
+      description: "Encontrou um bug ou algo não está funcionando? Nos avise aqui",
+      href: "/suporte/reportar",
       gradient: "from-[#F5C6C6] to-[#E8A5A5] dark:from-pink-600 dark:to-rose-600",
     },
     {
-      icon: Crown,
-      title: "Meu Plano",
-      description: "Gerencie seu plano e acesse recursos Premium",
-      href: "/plano",
-      gradient: "from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-600",
-    },
-    {
-      icon: Calculator,
-      title: "Calculadora de preço",
-      description: "Descubra quanto cobrar pelos seus produtos ou serviços",
-      href: "/calculadora",
+      icon: Mail,
+      title: "Falar com o suporte",
+      description: "Entre em contato direto com nossa equipe de suporte",
+      href: "/suporte/contato",
       gradient: "from-[#A8D5BA] to-[#7AC69C] dark:from-emerald-600 dark:to-teal-600",
-    },
-    {
-      icon: Users,
-      title: "Indicações",
-      description: "Indique amigos e ganhe benefícios no Premium",
-      href: "/indicacoes",
-      gradient: "from-[#8A7CA8] to-[#A89CC6] dark:from-purple-600 dark:to-indigo-600",
-    },
-    {
-      icon: Grid3x3,
-      title: "Explorar todas as RendEx",
-      description: "Veja todas as oportunidades disponíveis no catálogo",
-      href: "/catalogo",
-      gradient: "from-[#7A9CC6] to-[#F5C6C6] dark:from-blue-600 dark:to-pink-600",
-    },
-    {
-      icon: Headphones,
-      title: "Suporte e Feedback",
-      description: "Envie sugestões, reporte problemas ou fale com o suporte",
-      href: "/suporte",
-      gradient: "from-[#A8D5BA] to-[#7A9CC6] dark:from-teal-600 dark:to-blue-600",
     },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6 transition-colors duration-300">
-      {/* Botão de tema */}
-      <ThemeToggle />
-      
       <div className="max-w-6xl mx-auto">
-        {/* Header com boas-vindas */}
-        <div className="text-center mb-12 mt-8">
+        {/* Botão voltar */}
+        <div className="mb-8 mt-4">
+          <Link
+            href="/home"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#7A9CC6] dark:hover:text-blue-400 transition-colors duration-300"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Voltar para o início
+          </Link>
+        </div>
+
+        {/* Header */}
+        <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3 transition-colors duration-300">
-            Olá, {userName || "Usuário"}! 👋
+            Suporte e Feedback
           </h1>
-          <p className="text-xl text-gray-700 dark:text-gray-300 transition-colors duration-300">
-            Escolha o próximo passo da sua RendEx
+          <p className="text-xl text-gray-700 dark:text-gray-300 transition-colors duration-300 max-w-2xl mx-auto">
+            Estamos aqui para ajudar! Envie suas sugestões, reporte problemas ou entre em contato com nossa equipe.
           </p>
         </div>
 
         {/* Grid de cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {cards.map((card) => {
             const Icon = card.icon;
             return (
@@ -157,16 +113,6 @@ export default function HomePage() {
               </Link>
             );
           })}
-        </div>
-
-        {/* Link para perfil */}
-        <div className="text-center mt-12">
-          <Link
-            href="/profile"
-            className="text-gray-600 dark:text-gray-400 hover:text-[#7A9CC6] dark:hover:text-blue-400 transition-colors duration-300 font-medium"
-          >
-            Ver meu perfil →
-          </Link>
         </div>
       </div>
     </div>
