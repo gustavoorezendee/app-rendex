@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { ChevronRight, ChevronLeft, X, User, Lock, Crown, Clock, HelpCircle, Sparkles, Home } from "lucide-react";
+import { ChevronRight, ChevronLeft, X, User, Lock, Crown, Clock, HelpCircle, Sparkles, Home, Target, LogIn } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -234,11 +234,15 @@ function RendExAppContent() {
   // Carregar último resultado salvo quando usuário está logado
   useEffect(() => {
     const carregarResultadoSalvo = async () => {
+      // Verificar se usuário está refazendo o quiz
+      const refazendoQuiz = typeof window !== 'undefined' && localStorage.getItem("refazendo_quiz") === "true";
+      
       // Só carregar se:
       // 1. Usuário está logado
       // 2. Não há resultado atual em memória (rendexRecomendadas vazio)
       // 3. Está na tela home (não está no meio do quiz)
-      if (!user || rendexRecomendadas.length > 0 || step !== "home") {
+      // 4. NÃO está refazendo o quiz
+      if (!user || rendexRecomendadas.length > 0 || step !== "home" || refazendoQuiz) {
         return;
       }
 
@@ -672,6 +676,11 @@ function RendExAppContent() {
             const rendexIds = rendex.map(r => r.id);
             salvarResultado(supabaseProfile.perfil_rendex, rendexIds);
           }
+
+          // Remover estado de refazendo_quiz quando terminar o quiz
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem("refazendo_quiz");
+          }
         });
 
         // Aguardar 2.8 segundos no loading
@@ -716,9 +725,11 @@ function RendExAppContent() {
     // Limpar localStorage também (caso exista resultado temporário)
     if (typeof window !== 'undefined') {
       localStorage.removeItem(QUIZ_RESULT_STORAGE_KEY);
+      // Setar estado de refazendo_quiz
+      localStorage.setItem("refazendo_quiz", "true");
     }
     
-    // Resetar estados e voltar para o início
+    // Resetar estados e voltar para a tela inicial
     setStep("home");
     setCurrentQuestion(0);
     setAnswers([]);
@@ -729,6 +740,16 @@ function RendExAppContent() {
 
   const handleIrParaInicio = () => {
     router.push("/home");
+  };
+
+  const handleEntrar = () => {
+    if (user) {
+      // Se já está logado, redirecionar para /home
+      router.push("/home");
+    } else {
+      // Se não está logado, redirecionar para login
+      router.push("/auth/login?redirect=/home");
+    }
   };
 
   // Tela Inicial - VERSÃO MELHORADA
@@ -827,19 +848,33 @@ function RendExAppContent() {
             <span>100% gratuito e personalizado</span>
           </div>
 
-          {/* Botão melhorado com animações */}
-          <button
-            onClick={() => setStep("quiz")}
-            className="group relative w-full max-w-xs mx-auto py-3.5 sm:py-4 px-6 sm:px-8 bg-gradient-to-r from-[#7A9CC6] via-[#8A7CA8] to-[#F5C6C6] dark:from-blue-500 dark:via-purple-500 dark:to-pink-500 text-white text-base sm:text-lg font-semibold rounded-2xl sm:rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
-          >
-            {/* Efeito de brilho animado */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-            
-            <span className="relative flex items-center justify-center gap-2">
-              Começar agora
-              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-2 transition-transform duration-300" />
-            </span>
-          </button>
+          {/* Botões de ação */}
+          <div className="space-y-3 sm:space-y-4">
+            {/* Botão Começar agora */}
+            <button
+              onClick={() => setStep("quiz")}
+              className="group relative w-full max-w-xs mx-auto py-3.5 sm:py-4 px-6 sm:px-8 bg-gradient-to-r from-[#7A9CC6] via-[#8A7CA8] to-[#F5C6C6] dark:from-blue-500 dark:via-purple-500 dark:to-pink-500 text-white text-base sm:text-lg font-semibold rounded-2xl sm:rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+            >
+              {/* Efeito de brilho animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+              
+              <span className="relative flex items-center justify-center gap-2">
+                Começar agora
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-2 transition-transform duration-300" />
+              </span>
+            </button>
+
+            {/* Botão Entrar */}
+            <button
+              onClick={handleEntrar}
+              className="group relative w-full max-w-xs mx-auto py-3 sm:py-3.5 px-6 sm:px-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-[#7A9CC6] dark:text-blue-400 text-base sm:text-lg font-semibold rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-2 border-[#7A9CC6]/30 dark:border-blue-500/30 hover:border-[#7A9CC6] dark:hover:border-blue-500"
+            >
+              <span className="relative flex items-center justify-center gap-2">
+                <LogIn className="w-5 h-5 sm:w-5 sm:h-5" />
+                {user ? "Ir para o início" : "Entrar"}
+              </span>
+            </button>
+          </div>
 
           {/* Texto de confiança */}
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">

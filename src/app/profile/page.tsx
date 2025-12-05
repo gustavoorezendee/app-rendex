@@ -4,9 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LogOut, User, Mail, Edit2, Check, X } from "lucide-react";
+import { LogOut, User, Mail, Edit2, Check, X, Target } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { RendexProfile } from "@/components/RendexProfile";
 
 export default function ProfilePage() {
   const { user, signOut, loading } = useAuth();
@@ -253,6 +254,29 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
+
+        {/* Perfil RendEx - Trilha */}
+        <RendexProfile userId={user.id} />
+
+        {/* Link para a Trilha */}
+        <Link
+          href="/trilha"
+          className="block bg-white/80 dark:bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+        >
+          <div className="flex items-center gap-4">
+            <div className="bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 p-4 rounded-xl">
+              <Target className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-1">
+                Acessar Trilha RendEx
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Continue sua jornada de 360 dias rumo à multiplicação de renda
+              </p>
+            </div>
+          </div>
+        </Link>
 
         {/* Informações adicionais */}
         <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 text-center">
