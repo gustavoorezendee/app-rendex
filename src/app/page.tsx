@@ -711,7 +711,7 @@ function RendExAppContent() {
 
     // Pegar feedback específico da alternativa escolhida
     const currentQ = questions[currentQuestion];
-    const feedback = currentQ.feedbacks[value as keyof typeof currentQ.feedbacks];
+    const feedback = currentQ.feedbacks[value as keyof typeof currentQ.feedbacks] || "";
     setCurrentFeedback(feedback);
 
     // Mostrar tela de feedback
@@ -1331,25 +1331,49 @@ function RendExAppContent() {
               
               <div className="space-y-4">
                 <p className="text-gray-700 dark:text-gray-300">
-                  {selectedIdea.descricao_completa}
+                  {selectedIdea.descricao_curta}
                 </p>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
+
+                <div className="space-y-3">
+                  <div>
+                    <span className="font-semibold text-gray-600 dark:text-gray-400 block mb-1">Primeiro Passo:</span>
+                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.primeiro_passo}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-600 dark:text-gray-400 block mb-1">Teste 24h:</span>
+                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.teste_24h}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div>
                     <span className="font-semibold text-gray-600 dark:text-gray-400">Investimento:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.investimento_inicial}</p>
+                    <p className="text-gray-800 dark:text-gray-200">R$ {selectedIdea.investimento_inicial}</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400">Retorno:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.tempo_retorno}</p>
+                    <span className="font-semibold text-gray-600 dark:text-gray-400">Tempo Início:</span>
+                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.tempo_inicio}</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400">Dificuldade:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.nivel_dificuldade}</p>
+                    <span className="font-semibold text-gray-600 dark:text-gray-400">Complexidade:</span>
+                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.complexidade}/10</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400">Tempo:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.tempo_dedicacao}</p>
+                    <span className="font-semibold text-gray-600 dark:text-gray-400">Categoria:</span>
+                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.categoria}</p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="space-y-2">
+                    <div>
+                      <span className="font-semibold text-gray-600 dark:text-gray-400">Ganho Inicial Estimado:</span>
+                      <p className="text-gray-800 dark:text-gray-200">{selectedIdea.ganho_inicial_estimado}</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-600 dark:text-gray-400">Ganho em 3 Meses:</span>
+                      <p className="text-gray-800 dark:text-gray-200">{selectedIdea.ganho_3meses_estimado}</p>
+                    </div>
                   </div>
                 </div>
               </div>
