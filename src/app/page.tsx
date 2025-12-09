@@ -1185,13 +1185,13 @@ function RendExAppContent() {
     );
   }
 
-  // Tela de Resultados - ESTILO ORIGINAL RESTAURADO
+  // Tela de Resultados - NOVO DESIGN MODERNO
   if (step === "results" && userProfile && rendexRecomendadas.length > 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 sm:p-6 md:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-[#D6EAF8] via-[#F0F8FF] to-[#FFE8E8] dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 sm:p-6 md:p-8 transition-colors duration-300">
         <ThemeToggle />
-        
-        <div className="max-w-4xl mx-auto space-y-6">
+
+        <div className="max-w-6xl mx-auto space-y-8">
           {/* Cabeçalho */}
           <div className="text-center space-y-3">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#7A9CC6] via-[#8A7CA8] to-[#F5C6C6] dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
@@ -1203,14 +1203,14 @@ function RendExAppContent() {
           </div>
 
           {/* Descrição do Perfil */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
+          <div className="bg-white/80 dark:bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/40 dark:border-slate-700/40">
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
               {userProfile.description}
             </p>
           </div>
 
           {/* Pontos Fortes */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
+          <div className="bg-white/80 dark:bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/40 dark:border-slate-700/40">
             <h2 className="text-2xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-4">
               Seus Pontos Fortes
             </h2>
@@ -1225,7 +1225,7 @@ function RendExAppContent() {
           </div>
 
           {/* Trava Principal */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
+          <div className="bg-white/80 dark:bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/40 dark:border-slate-700/40">
             <h2 className="text-2xl font-bold text-[#F5C6C6] dark:text-pink-400 mb-3">
               Sua Trava Principal: {userProfile.mainBlock}
             </h2>
@@ -1235,7 +1235,7 @@ function RendExAppContent() {
           </div>
 
           {/* O Que Você Busca */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
+          <div className="bg-white/80 dark:bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/40 dark:border-slate-700/40">
             <h2 className="text-2xl font-bold text-[#8A7CA8] dark:text-purple-400 mb-3">
               O Que Você Busca: {userProfile.seeking}
             </h2>
@@ -1245,46 +1245,104 @@ function RendExAppContent() {
           </div>
 
           {/* Mensagem Final */}
-          <div className="bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-500 dark:to-purple-500 rounded-2xl p-6 shadow-md">
+          <div className="bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 rounded-3xl p-6 shadow-xl">
             <p className="text-white leading-relaxed">
               {userProfile.finalMessage}
             </p>
           </div>
 
-          {/* Recomendações de RendEx - ESTILO ORIGINAL */}
-          <div className="space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-[#7A9CC6] dark:text-blue-400">
-              Suas 3 Recomendações de RendEx
-            </h2>
-            
-            <div className="space-y-4">
+          {/* Recomendações de RendEx - NOVO DESIGN */}
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#7A9CC6] dark:text-blue-400">
+                Suas 3 Recomendações de RendEx
+              </h2>
+              {!isPremium && (
+                <div className="inline-block bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-300 px-4 py-2 rounded-lg text-sm">
+                  💡 Com o plano Premium, você desbloqueia os guias completos passo a passo
+                </div>
+              )}
+            </div>
+
+            {/* Grid de cards verticais modernos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {rendexRecomendadas.slice(0, 3).map((rendex, index) => (
                 <div
                   key={rendex.id}
-                  className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow"
+                  className={`relative bg-white dark:bg-slate-800/90 rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-all duration-300 ${
+                    index === 0 ? "ring-4 ring-[#F5C6C6] dark:ring-pink-600" : ""
+                  }`}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl font-bold text-[#7A9CC6] dark:text-blue-400">
-                        {index + 1}
-                      </span>
-                      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                        {rendex.nome}
-                      </h3>
+                  {/* Badge "Mais recomendada" */}
+                  {index === 0 && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <div className="bg-gradient-to-r from-[#F5C6C6] to-[#8A7CA8] dark:from-pink-600 dark:to-purple-600 text-white text-sm font-bold py-2 px-6 rounded-full shadow-lg whitespace-nowrap">
+                        ⭐ Mais recomendada
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-4 mt-2">
+                    {/* Nome */}
+                    <h3 className="text-2xl font-bold text-[#7A9CC6] dark:text-blue-400">{rendex.nome}</h3>
+
+                    {/* Descrição */}
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{rendex.descricao_curta}</p>
+
+                    {/* Categoria */}
+                    <div className="inline-block bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] dark:from-blue-900/50 dark:to-pink-900/50 px-3 py-1 rounded-full text-sm font-medium text-[#7A9CC6] dark:text-blue-400">
+                      {rendex.categoria}
+                    </div>
+
+                    {/* Informações - Conteúdo Gratuito */}
+                    <div className="space-y-2 pt-2 bg-gradient-to-r from-[#D6EAF8]/30 to-[#FFE8E8]/30 dark:from-blue-900/20 dark:to-pink-900/20 p-4 rounded-xl">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Investimento:</span>
+                        <span className="font-semibold text-[#7A9CC6] dark:text-blue-400">
+                          R$ {rendex.investimento_inicial}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Tempo de início:</span>
+                        <span className="font-semibold text-[#7A9CC6] dark:text-blue-400">
+                          {rendex.tempo_inicio.replace("_", " ")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Ganho inicial:</span>
+                        <span className="font-semibold text-[#7A9CC6] dark:text-blue-400">
+                          {rendex.ganho_inicial_estimado}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Botão Ver detalhes */}
+                    <button
+                      onClick={() => {
+                        setSelectedIdea(rendex);
+                        setShowDetails(true);
+                      }}
+                      className="w-full mt-4 py-3 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                    >
+                      Ver detalhes
+                    </button>
+
+                    {/* Seção Premium */}
+                    <div className="pt-4 border-t border-gray-200 dark:border-slate-700">
+                      <button
+                        onClick={() => {
+                          if (user) {
+                            saveStateToLocalStorage();
+                          }
+                          router.push(`/plano?rendex=${rendex.id}`);
+                        }}
+                        className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                      >
+                        <Crown className="w-5 h-5" />
+                        {isPremium ? "Acessar plano completo" : "Ver plano Premium"}
+                      </button>
                     </div>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    {rendex.descricao_curta}
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSelectedIdea(rendex);
-                      setShowDetails(true);
-                    }}
-                    className="w-full py-2 px-4 bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-500 dark:to-purple-500 text-white rounded-xl hover:opacity-90 transition-opacity"
-                  >
-                    Ver detalhes
-                  </button>
                 </div>
               ))}
             </div>
@@ -1294,11 +1352,11 @@ function RendExAppContent() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <button
               onClick={handleRefazerQuiz}
-              className="px-6 py-3 bg-white dark:bg-gray-800 text-[#7A9CC6] dark:text-blue-400 font-semibold rounded-2xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-[#7A9CC6]/30 dark:border-blue-500/30"
+              className="px-6 py-3 bg-white dark:bg-slate-800 text-[#7A9CC6] dark:text-blue-400 font-semibold rounded-2xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-[#7A9CC6]/30 dark:border-blue-500/30"
             >
               Refazer teste
             </button>
-            
+
             {user && (
               <button
                 onClick={handleIrParaInicio}
@@ -1310,69 +1368,102 @@ function RendExAppContent() {
           </div>
         </div>
 
-        {/* Modal de Detalhes da RendEx */}
+        {/* Modal de Detalhes da RendEx - DESIGN ATUALIZADO */}
         {showDetails && selectedIdea && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl sm:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400">
-                  {selectedIdea.nome}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowDetails(false);
-                    setSelectedIdea(null);
-                  }}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+            <div className="bg-white dark:bg-slate-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+              {/* Header do modal */}
+              <div className="sticky top-0 bg-gradient-to-r from-[#7A9CC6] to-[#F5C6C6] dark:from-blue-600 dark:to-pink-600 p-6 rounded-t-3xl">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                      {selectedIdea.nome}
+                    </h2>
+                    <p className="text-white/90">{selectedIdea.descricao_curta}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowDetails(false);
+                      setSelectedIdea(null);
+                    }}
+                    className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                  >
+                    <X className="w-6 h-6 text-white" />
+                  </button>
+                </div>
               </div>
-              
-              <div className="space-y-4">
-                <p className="text-gray-700 dark:text-gray-300">
-                  {selectedIdea.descricao_curta}
-                </p>
 
-                <div className="space-y-3">
-                  <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 block mb-1">Primeiro Passo:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.primeiro_passo}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 block mb-1">Teste 24h:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.teste_24h}</p>
-                  </div>
+              {/* Conteúdo do modal */}
+              <div className="p-8 space-y-6">
+                {/* Primeiro passo */}
+                <div>
+                  <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
+                    🎯 Primeiro Passo (Gratuito)
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed bg-gradient-to-r from-[#D6EAF8] to-[#FFE8E8] dark:from-blue-900/30 dark:to-pink-900/30 p-4 rounded-xl">
+                    {selectedIdea.primeiro_passo}
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400">Investimento:</span>
-                    <p className="text-gray-800 dark:text-gray-200">R$ {selectedIdea.investimento_inicial}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400">Tempo Início:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.tempo_inicio}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400">Complexidade:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.complexidade}/10</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-600 dark:text-gray-400">Categoria:</span>
-                    <p className="text-gray-800 dark:text-gray-200">{selectedIdea.categoria}</p>
-                  </div>
+                {/* Teste 24h */}
+                <div>
+                  <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3">
+                    ⚡ Teste em 24 horas
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed bg-gradient-to-r from-[#FFE8E8] to-[#F5C6C6]/30 dark:from-pink-900/30 dark:to-rose-900/30 p-4 rounded-xl">
+                    {selectedIdea.teste_24h}
+                  </p>
                 </div>
 
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="space-y-2">
-                    <div>
-                      <span className="font-semibold text-gray-600 dark:text-gray-400">Ganho Inicial Estimado:</span>
-                      <p className="text-gray-800 dark:text-gray-200">{selectedIdea.ganho_inicial_estimado}</p>
+                {/* Resumo do Plano de Ação Premium */}
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-2xl p-6 border border-amber-200 dark:border-amber-800">
+                  <h3 className="text-xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <Crown className="w-6 h-6 text-amber-500" />
+                    Plano de Ação Premium
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 mb-4">
+                    {isPremium
+                      ? "Você tem acesso ao plano completo de 7 dias, com passos detalhados, checklists práticos e orientações exclusivas."
+                      : "Desbloqueie o plano de ação completo de 7 dias, com passos detalhados, checklists práticos e orientações exclusivas para executar sua RendEx com sucesso."}
+                  </p>
+                  <button
+                    onClick={() => {
+                      if (user) {
+                        saveStateToLocalStorage();
+                      }
+                      router.push(`/plano?rendex=${selectedIdea.id}`);
+                    }}
+                    className="w-full py-3 bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                  >
+                    <Crown className="w-5 h-5" />
+                    {isPremium ? "Abrir plano de ação completo" : "Ver plano Premium"}
+                  </button>
+                </div>
+
+                {/* Informações rápidas */}
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-xl">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Investimento</div>
+                    <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
+                      R$ {selectedIdea.investimento_inicial}
                     </div>
-                    <div>
-                      <span className="font-semibold text-gray-600 dark:text-gray-400">Ganho em 3 Meses:</span>
-                      <p className="text-gray-800 dark:text-gray-200">{selectedIdea.ganho_3meses_estimado}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-xl">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Complexidade</div>
+                    <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
+                      {selectedIdea.complexidade}/5
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-xl">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Ganho inicial</div>
+                    <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
+                      {selectedIdea.ganho_inicial_estimado}
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-xl">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Em 3 meses</div>
+                    <div className="font-bold text-[#7A9CC6] dark:text-blue-400">
+                      {selectedIdea.ganho_3meses_estimado}
                     </div>
                   </div>
                 </div>
