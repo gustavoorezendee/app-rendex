@@ -3,18 +3,19 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { 
-  RefreshCw, 
-  Heart, 
-  Users, 
-  Grid3x3, 
-  Calculator, 
-  Crown, 
-  Headphones, 
+import {
+  RefreshCw,
+  Heart,
+  Users,
+  Grid3x3,
+  Calculator,
+  Crown,
+  Headphones,
   Target,
   Package,
   TrendingUp,
-  Lock
+  Lock,
+  User
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -165,6 +166,13 @@ export default function HomePage() {
       href: "/suporte",
       gradient: "from-[#A8D5BA] to-[#7A9CC6] dark:from-teal-600 dark:to-blue-600",
     },
+    {
+      icon: User,
+      title: "Meu Perfil",
+      description: "Veja seu perfil, dados do quiz e histórico",
+      href: "/profile",
+      gradient: "from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600",
+    },
   ];
 
   return (
@@ -292,7 +300,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {cards.map((card) => {
             const Icon = card.icon;
-            
+
             // Se o card tem onClick, renderizar como button
             if (card.onClick) {
               return (
@@ -322,7 +330,7 @@ export default function HomePage() {
                 </button>
               );
             }
-            
+
             // Caso contrário, renderizar como Link
             return (
               <Link
@@ -351,16 +359,6 @@ export default function HomePage() {
               </Link>
             );
           })}
-        </div>
-
-        {/* Link para perfil */}
-        <div className="text-center mt-12">
-          <Link
-            href="/profile"
-            className="text-gray-600 dark:text-gray-400 hover:text-[#7A9CC6] dark:hover:text-blue-400 transition-colors duration-300 font-medium"
-          >
-            Ver meu perfil →
-          </Link>
         </div>
       </div>
     </div>
