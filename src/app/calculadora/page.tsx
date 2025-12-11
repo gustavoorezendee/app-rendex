@@ -1054,9 +1054,415 @@ export default function CalculadoraPage() {
 
   // Renderizar conteúdo do passo atual para serviço (similar ao produto, mas adaptado)
   const renderServicoStep = () => {
-    // Implementação similar ao produto, mas com os campos de serviço
-    // Por brevidade, vou manter a estrutura básica
-    return <div>Serviço - Passo {currentStep}</div>;
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
+                Dados do serviço
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+                Informe as informações básicas do seu serviço
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Quantas horas leva um atendimento?
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={servicoData.horasPorAtendimento || ""}
+                  onChange={(e) =>
+                    setServicoData({
+                      ...servicoData,
+                      horasPorAtendimento: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
+                    errors.horasAtendimento ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  placeholder="Ex: 2"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Tempo médio dedicado a cada cliente
+                </p>
+                {errors.horasAtendimento && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.horasAtendimento}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Quanto você quer ganhar por hora? (R$)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={servicoData.valorHoraDesejado || ""}
+                  onChange={(e) =>
+                    setServicoData({
+                      ...servicoData,
+                      valorHoraDesejado: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
+                    errors.valorHora ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  placeholder="Ex: 50.00"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Valor que você considera justo pelo seu tempo
+                </p>
+                {errors.valorHora && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.valorHora}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
+                Custos diretos
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+                Custos específicos de cada atendimento
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Ex: materiais, deslocamento, comissões
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Custo direto por atendimento (R$) - opcional
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={servicoData.custoDiretoAtendimento || ""}
+                  onChange={(e) =>
+                    setServicoData({
+                      ...servicoData,
+                      custoDiretoAtendimento: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  placeholder="Ex: 15.00"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Gastos que variam por cliente atendido
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
+                Custos fixos mensais
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+                Adicione custos fixos relacionados a esse serviço
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Ex: aluguel, apps, energia, marketing
+              </p>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {servicoData.custosFixos.map((custo) => (
+                <div key={custo.id} className="flex gap-3 items-start">
+                  <div className="flex-1 space-y-2">
+                    <input
+                      type="text"
+                      value={custo.descricao}
+                      onChange={(e) =>
+                        atualizarCustoFixoServico(custo.id, "descricao", e.target.value)
+                      }
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                      placeholder="Descrição do custo"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={custo.valor || ""}
+                      onChange={(e) =>
+                        atualizarCustoFixoServico(custo.id, "valor", parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                      placeholder="Valor mensal (R$)"
+                    />
+                  </div>
+                  <button
+                    onClick={() => removerCustoFixoServico(custo.id)}
+                    className="mt-1 p-3 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                    aria-label="Remover custo"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                onClick={adicionarCustoFixoServico}
+                className="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl border-2 border-dashed border-[#7A9CC6] dark:border-blue-500 text-[#7A9CC6] dark:text-blue-400 hover:bg-[#7A9CC6] dark:hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold"
+              >
+                <Plus className="w-5 h-5" />
+                Adicionar custo fixo
+              </button>
+
+              {servicoData.custosFixos.length > 0 && (
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Total de custos fixos:{" "}
+                    <span className="text-[#7A9CC6] dark:text-blue-400 text-lg">
+                      {formatarMoeda(
+                        servicoData.custosFixos.reduce((acc, c) => acc + (c.valor || 0), 0)
+                      )}
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Quantas horas mensais você dedica a esse serviço?
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={servicoData.horasMes || ""}
+                onChange={(e) =>
+                  setServicoData({
+                    ...servicoData,
+                    horasMes: parseFloat(e.target.value) || 0,
+                  })
+                }
+                className={`w-full px-4 py-3 text-lg rounded-xl border-2 ${
+                  errors.horasMes ? "border-red-300 dark:border-red-500" : "border-gray-200 dark:border-gray-600"
+                } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                placeholder="Ex: 80"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Total de horas disponíveis por mês
+              </p>
+              {errors.horasMes && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.horasMes}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
+                Taxas
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+                Informe as taxas sobre o valor do serviço
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Taxas sobre o preço (%) - opcional
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={servicoData.taxaSobrePrecoPercent || ""}
+                  onChange={(e) =>
+                    setServicoData({
+                      ...servicoData,
+                      taxaSobrePrecoPercent: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-[#7A9CC6] dark:focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  placeholder="Ex: 5.5"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Ex: maquininha (3%), marketplace (10%)
+                </p>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-800 dark:text-blue-300">
+                  As taxas são calculadas sobre o preço final e serão consideradas no cálculo do valor ideal
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        const resultado = calcularResultadoServico();
+        return (
+          <div className="space-y-6" id="result-section">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#7A9CC6] dark:text-blue-400 mb-2">
+                Resultado da Calculadora
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+                Valores calculados para o seu serviço
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-2 uppercase tracking-wide">
+                  Preço mínimo
+                </h3>
+                <p className="text-4xl font-bold text-amber-900 dark:text-amber-300 mb-1">
+                  {formatarMoeda(resultado.precoMinimo)}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  Para cobrir seus custos
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-green-800 dark:text-green-400 mb-2 uppercase tracking-wide">
+                  Preço ideal
+                </h3>
+                <p className="text-4xl font-bold text-green-900 dark:text-green-300 mb-1">
+                  {formatarMoeda(resultado.precoIdeal)}
+                </p>
+                <p className="text-xs text-green-700 dark:text-green-400">
+                  Incluindo tempo e custos
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-blue-800 dark:text-blue-400 mb-2 uppercase tracking-wide">
+                  Lucro por atendimento
+                </h3>
+                <p className="text-4xl font-bold text-blue-900 dark:text-blue-300 mb-1">
+                  {formatarMoeda(resultado.lucroAtendimento)}
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-400">
+                  Em cada atendimento
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xs font-semibold text-purple-800 dark:text-purple-400 mb-2 uppercase tracking-wide">
+                  Ganho por hora
+                </h3>
+                <p className="text-4xl font-bold text-purple-900 dark:text-purple-300 mb-1">
+                  {formatarMoeda(resultado.lucroPorHora)}
+                </p>
+                <p className="text-xs text-purple-700 dark:text-purple-400">
+                  Valor líquido por hora
+                </p>
+              </div>
+            </div>
+
+            {/* Simulação de atendimentos */}
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-2xl p-6 border-2 border-indigo-200 dark:border-indigo-700">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wide">
+                  Simule seu lucro mensal
+                </h3>
+              </div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                E se você fizer quantos atendimentos por mês?
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={servicoData.atendimentosSimulacao || ""}
+                onChange={(e) =>
+                  setServicoData({
+                    ...servicoData,
+                    atendimentosSimulacao: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full px-4 py-3 text-lg rounded-xl border-2 border-indigo-200 dark:border-indigo-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-indigo-400 dark:focus:border-indigo-500 focus:outline-none transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                placeholder="Ex: 20"
+              />
+              {resultado.lucroSimulacao !== null && (
+                <div className="mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-1">Seu lucro mensal seria:</p>
+                  <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-300">
+                    {formatarMoeda(resultado.lucroSimulacao)}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 rounded-2xl p-6">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
+                💡 <strong>Entenda os números:</strong> O preço ideal considera seu tempo, custos diretos,
+                custos fixos e taxas. Assim você garante que está valorizando seu trabalho de forma justa.
+              </p>
+            </div>
+
+            {/* Botão Salvar no Catálogo */}
+            <button
+              onClick={handleOpenSaveModal}
+              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#7A9CC6] to-[#8A7CA8] dark:from-blue-600 dark:to-purple-600 text-white font-semibold hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <Save className="w-5 h-5" />
+              Salvar no Catálogo
+            </button>
+
+            <button
+              onClick={() => {
+                setCurrentStep(1);
+                setServicoData({
+                  horasPorAtendimento: 0,
+                  valorHoraDesejado: 0,
+                  custoDiretoAtendimento: 0,
+                  custosFixos: [],
+                  horasMes: 0,
+                  taxaSobrePrecoPercent: 0,
+                  atendimentosPorMes: 0,
+                  atendimentosSimulacao: 0,
+                });
+              }}
+              className="w-full py-4 px-6 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
+            >
+              Fazer novo cálculo
+            </button>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
